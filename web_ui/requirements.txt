@@ -1,0 +1,5 @@
+flask
+flask-bootstrap
+lask-login
+flask-wtf
+flask_script

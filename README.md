@@ -1,2 +1,2 @@
-# uerrs
-Universal Experiment Research Results Storage
+# Euclid
+Euclid: Universal Experiment Research Results Storage
