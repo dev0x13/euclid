@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from flask_script import Manager, Server
-from application import create_app
-from application.config import AppConfig
+from app import create_app
+from app.config import AppConfig
 
 app = create_app()
 app.config.from_object(AppConfig)

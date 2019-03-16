@@ -1,0 +1,44 @@
+{% import "bootstrap/utils.html" as utils %}
+
+{% macro render_field(field, label_visible=true, glyphicon=None, glyphicon_click=None, inline_errors=False, form_group=True, class_='form-control') -%}
+    {% if form_group %}
+        <div class='form-group {{ kwargs.pop("class_", "") }}' id="fg_div_{{ field.id }}">
+    {% endif %}
+    {% if (field.type != 'HiddenField' and field.type != 'CSRFTokenField') and label_visible %}
+        <label for='{{ field.id }}' class='control-label'>{{ field.label }} {% if field.flags.required %}
+            *{% endif %}</label>
+    {% endif %}
+    {% if glyphicon %}
+        <div class='input-group'>
+    {% endif %}
+    {{ field(class_=class_, **kwargs) }}
+    {% if field.description %}
+        <span class="help-block">{{ field.description }}</span>
+    {% endif %}
+    {% if field.errors and inline_errors %}
+        {% for e in field.errors %}
+            <p class='help-block'>{{ e }}</p>
+        {% endfor %}
+    {% endif %}
+    {% if glyphicon %}
+        <span class="input-group-btn">
+             <button class="btn btn-default" type="button"
+                     onclick="{{ glyphicon_click }}">{{ utils.icon(glyphicon) }}</button>
+           </span>
+        </div>
+    {% endif %}
+    {% if form_group %}
+        </div>
+    {% endif %}
+{%- endmacro %}
+
+{% macro render_form(form, method="POST", action_text=None, class_='', btn_class='btn btn-primary', id='', action='', enctype='') -%}
+    <form method='{{ method }}' action='{{ action }}' class='{{ class_ }}' id='{{ id }}' {% if enctype %}
+          enctype={{ enctype }} {% endif %}>
+        {{ form.hidden_tag() }}
+        {{ caller() }}
+        {% if action_text %}
+            <input type='submit' class='{{ btn_class }}' value='{{ action_text }}'>
+        {% endif %}
+    </form>
+{%- endmacro %}
