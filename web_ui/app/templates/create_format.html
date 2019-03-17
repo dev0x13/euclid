@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+
+{% block styles %}
+    {{ super() }}
+    <style type="text/css" media="screen">
+        #editor {
+            width: 50%;
+            height: 100px;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        let editor = ace.edit("editor", {
+           minLines: 20,
+           maxLines: 50,
+           autoScrollEditorIntoView: true,
+        });
+        editor.setTheme("ace/theme/dawn");
+        editor.session.setMode("ace/mode/json");
+        document.getElementById('editor').style.fontSize='16px';
+    </script>
+{% endblock %}
+
+{% block page_content %}
+    <div id="editor"></div>
+    <br>
+    <button type="button" class="btn btn-primary">Create</button>
+{% endblock %}

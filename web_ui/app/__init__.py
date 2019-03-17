@@ -32,6 +32,7 @@ def create_app():
     import app.fcomponents.Parsers.controllers as ParsersModule
     import app.fcomponents.Tools.controllers as ToolsModule
     import app.fcomponents.User.controllers as UsersModule
+    import app.fcomponents.Formats.controllers as FormatsModule
 
     app.register_blueprint(AdminModule.module)
     app.register_blueprint(BatchesModule.module)
@@ -40,10 +41,12 @@ def create_app():
     app.register_blueprint(ParsersModule.module)
     app.register_blueprint(ToolsModule.module)
     app.register_blueprint(UsersModule.module)
+    app.register_blueprint(FormatsModule.module)
 
     @app.before_request
     def check_valid_login():
-        if request.endpoint and 'login' not in request.endpoint and not current_user.is_authenticated:
+        if request.endpoint and 'login' not in request.endpoint and 'static' not in request.endpoint\
+                and not current_user.is_authenticated:
             return redirect(url_for("User.login", next=request.endpoint))
 
     @app.errorhandler(404)
