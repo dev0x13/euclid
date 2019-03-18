@@ -2,7 +2,6 @@
 
 from app import db
 from bson.objectid import ObjectId
-from flask_login import current_user
 
 
 class UserModel:

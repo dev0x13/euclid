@@ -13,11 +13,13 @@ def login():
     logout_user()
     form = LoginForm()
     if form.validate_on_submit():
-        user = UserModel().load(username=form.username.data)
+        user = UserModel.load(username=form.username.data)
+
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for("index"))
         Helpers.flash_message("Wrong username or password")
+
     return render_template("login.html", form=form, title="Login")
 
 
