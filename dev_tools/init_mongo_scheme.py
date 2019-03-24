@@ -7,8 +7,8 @@ from pymongo import MongoClient
 
 db_host = "localhost"
 db_port = 27017
-default_username = "kek"
-default_password = "kek"
+default_username = "test"
+default_password = "test"
 
 ##########
 
