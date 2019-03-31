@@ -7,10 +7,10 @@ from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, SelectField
 
-from application.app.fcomponents import Helpers
-from application.app.fcomponents.Formats.controllers import FormatModel
-from application.app.fcomponents.Helpers import ModelFactory
-from application.app.fcomponents.User.models import UserModel
+from app.fcomponents import Helpers
+from app.fcomponents.Formats.controllers import FormatModel
+from app.fcomponents.Helpers import ModelFactory
+from app.fcomponents.User.models import UserModel
 
 module = Blueprint("Parsers", __name__, url_prefix="/parsers")
 

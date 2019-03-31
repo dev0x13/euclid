@@ -4,12 +4,12 @@ from flask import Flask, request, redirect, url_for, render_template
 from flask_login import LoginManager, current_user
 from flask_bootstrap import Bootstrap
 from pymongo import MongoClient
-from application.app.config import AppConfig
+from app.config import AppConfig
 
 client = MongoClient(AppConfig.DB_HOST, AppConfig.DB_PORT)
 db = client.euclid
 
-from application.app.fcomponents.User.models import UserModel
+from app.fcomponents.User.models import UserModel
 
 
 def create_app():
@@ -25,14 +25,14 @@ def create_app():
     def user_loader(uid):
         return UserModel.load(uid)
 
-    import application.app.fcomponents.Admin.controllers as AdminModule
-    import application.app.fcomponents.Batches.controllers as BatchesModule
-    import application.app.fcomponents.Experiments.controllers as ExperimentsModule
-    import application.app.fcomponents.Samples.controllers as SamplesModule
-    import application.app.fcomponents.Parsers.controllers as ParsersModule
-    import application.app.fcomponents.Tools.controllers as ToolsModule
-    import application.app.fcomponents.User.controllers as UsersModule
-    import application.app.fcomponents.Formats.controllers as FormatsModule
+    import app.fcomponents.Admin.controllers as AdminModule
+    import app.fcomponents.Batches.controllers as BatchesModule
+    import app.fcomponents.Experiments.controllers as ExperimentsModule
+    import app.fcomponents.Samples.controllers as SamplesModule
+    import app.fcomponents.Parsers.controllers as ParsersModule
+    import app.fcomponents.Tools.controllers as ToolsModule
+    import app.fcomponents.User.controllers as UsersModule
+    import app.fcomponents.Formats.controllers as FormatsModule
 
     app.register_blueprint(AdminModule.module)
     app.register_blueprint(BatchesModule.module)

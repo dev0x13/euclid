@@ -3,9 +3,9 @@ from flask_login import login_required
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, validators
 import json
-import application.app.fcomponents.Helpers as Helpers
-from application.app import db
-from application.app.fcomponents.Helpers import ModelFactory
+import app.fcomponents.Helpers as Helpers
+from app import db
+from app.fcomponents.Helpers import ModelFactory
 
 module = Blueprint("Formats", __name__, url_prefix="/formats")
 
@@ -29,7 +29,7 @@ class FormatModel(ModelFactory.produce("formats", ["json_data", "title"])):
 
     @classmethod
     def delete(cls, uid):
-        from application.app.fcomponents.Batches.controllers import BatchModel
+        from app.fcomponents.Batches.controllers import BatchModel
 
         batch = BatchModel.find_one({"format_uid": uid})
         if batch:

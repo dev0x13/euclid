@@ -1,5 +1,5 @@
 from flask import flash
-from application.app import db
+from app import db
 from bson.objectid import ObjectId
 
 

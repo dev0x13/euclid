@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from application.app import db
+from app import db
 from bson.objectid import ObjectId
 
 
