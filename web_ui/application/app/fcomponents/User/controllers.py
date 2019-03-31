@@ -1,9 +1,9 @@
 from flask import Blueprint, redirect, render_template, url_for
 from flask_login import login_user, logout_user, login_required, current_user
-from app.fcomponents.User.forms import LoginForm
-from app.fcomponents.User.models import UserModel
+from application.app.fcomponents.User.forms import LoginForm
+from application.app.fcomponents.User.models import UserModel
 from werkzeug.security import check_password_hash
-import app.fcomponents.Helpers as Helpers
+import application.app.fcomponents.Helpers as Helpers
 
 module = Blueprint("User", __name__, url_prefix="/user")
 

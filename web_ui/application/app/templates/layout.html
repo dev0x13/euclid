@@ -29,7 +29,7 @@
                            aria-expanded="false">Experimenting <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             {% if current_user.get_access_level("batches") %}
-                                <li><a href='#'>Batches</a></li>
+                                <li><a href='{{ url_for("Batches.index") }}'>Batches</a></li>
                             {% endif %}
                             {% if current_user.get_access_level("experiments") %}
                                 <li><a href='#'>Experiments</a></li>
@@ -54,7 +54,7 @@
                             <ul class="dropdown-menu">
                                 <li><a href='#'>Users</a></li>
                                 <li><a href='#'>Access</a></li>
-                                <li><a href='#'>Apps</a></li>
+                                <li><a href='{{ url_for("Admin.apps") }}'>Apps</a></li>
                             </ul>
                         </li>
                     {% endif %}

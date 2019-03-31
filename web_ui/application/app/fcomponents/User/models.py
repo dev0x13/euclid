@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from app import db
+from application.app import db
 from bson.objectid import ObjectId
 
 
@@ -44,6 +44,12 @@ class UserModel:
             return None
 
         return user
+
+    @classmethod
+    def get_name(cls, uid):
+        rec = db.users.find_one({"_id": ObjectId(uid)})
+
+        return rec["username"] if rec else None
 
     def get_access_level(self, action):
         return True

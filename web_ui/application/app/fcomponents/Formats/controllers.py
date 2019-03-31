@@ -3,8 +3,9 @@ from flask_login import login_required
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, validators
 import json
-import app.fcomponents.Helpers as Helpers
-from app.fcomponents.Formats.models import FormatModel
+import application.app.fcomponents.Helpers as Helpers
+from application.app import db
+from application.app.fcomponents.Helpers import ModelFactory
 
 module = Blueprint("Formats", __name__, url_prefix="/formats")
 
@@ -12,6 +13,36 @@ module = Blueprint("Formats", __name__, url_prefix="/formats")
 class FormatForm(FlaskForm):
     format = HiddenField()
     title = StringField([validators.DataRequired()], render_kw={"placeholder": "Title"})
+
+
+class FormatModel(ModelFactory.produce("formats", ["json_data", "title"])):
+    def save(self):
+        if self.title == "":
+            raise ValueError("Invalid title")
+
+        conflicts = db[self.table].find_one({"title": self.title})
+
+        if conflicts:
+            raise ValueError("Format with specified title already exists")
+
+        super().save()
+
+    @classmethod
+    def delete(cls, uid):
+        from application.app.fcomponents.Batches.controllers import BatchModel
+
+        batch = BatchModel.find_one({"format_uid": uid})
+        if batch:
+            raise ValueError("The format is used by following batch: <b>%s</b>" % batch.uid)
+
+        # TODO: Here come the same logic for experiments and samples:
+        # if BatchModel.find_one({"format_uid": uid}):
+        #    raise ValueError("This format is used by some experiments")
+        #
+        # if BatchModel.find_one({"format_uid": uid}):
+        #    raise ValueError("This format is used by some samples")
+
+        super().save()
 
 
 @module.route("/")
@@ -53,7 +84,11 @@ def create():
 @login_required
 def delete(uid):
     # TODO: check access
-    FormatModel.delete(uid)
+
+    try:
+        FormatModel.delete(uid)
+    except ValueError as e:
+        Helpers.flash(str(e), category="danger")
 
     return redirect(url_for("Formats.index"))
 

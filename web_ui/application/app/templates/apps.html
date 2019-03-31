@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+
+{% block styles %}
+    {{ super() }}
+    <link rel='stylesheet' type='text/css'
+          href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.2/bootstrap-table.min.css'>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.2/bootstrap-table.min.js'></script>
+{% endblock %}
+
+{% block page_content %}
+    <a class="btn btn-primary" data-toggle="modal" data-target="#app_modal" role="button">Add</a>
+    <br>
+    <br>
+    <table class='table table-striped table-hover' data-pagination="true" data-toggle="table" id="formats">
+        <thead>
+        <tr>
+            <th data-field="a" data-sortable="true">Title</th>
+            <th data-field="b" data-sortable="false">Key</th>
+            <th data-field="c" data-sortable="true">Creator</th>
+            <th class="col-xs-1"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for f in apps %}
+            <tr>
+                <td>{{ f.title }}</td>
+                <td>{{ f.key }}</td>
+                <td>{{ f.creator_name }}</td>
+                <td>{{ macros.render_button_with_confirm(utils.icon('trash'), 'btn btn-default', url_for("Admin.delete_app", uid=f.uid)) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class='modal fade' id='app_modal' tabindex='-1' role='dialog' aria-labelledby='app_modal_label'
+         aria-hidden='true'>
+        <div class='modal-dialog'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>
+                    <h4 class='modal-title' id='handbook_modal_label'>Add external app</h4>
+                </div>
+                <div class='modal-body'>
+                    {% call macros.render_form(form, action_text="Add") %}
+                        {{ macros.render_field(form.title, label_visible=False) }}
+                    {% endcall %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
