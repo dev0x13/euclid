@@ -34,7 +34,7 @@ class UserModel:
         self.username = ""
         self.email = ""
         self.password = ""
-        self.actionMask = int(33)
+        self.actionMask = int(31)
 
     @classmethod
     def load(cls, uid=None, username=None):

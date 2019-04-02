@@ -9,7 +9,7 @@ db_host = "localhost"
 db_port = 27017
 default_username = "test"
 default_password = "test"
-default_actions = int(33)
+default_actions = int(31)
 
 ##########
 
