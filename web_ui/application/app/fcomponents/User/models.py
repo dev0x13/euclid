@@ -6,6 +6,16 @@ from bson.objectid import ObjectId
 
 class UserModel:
 
+    # returns bit mask shift
+    action_shift = {
+        'isAdmin': 0,
+        'manageParsers': 1,
+        'manageExprData': 2,
+		'viewExprData': 3,
+		'createFormats': 4,
+		'generateReports': 5
+    }
+
     def is_authenticated(self):
         return True
 
@@ -24,6 +34,7 @@ class UserModel:
         self.username = ""
         self.email = ""
         self.password = ""
+        self.actionMask = int(33)
 
     @classmethod
     def load(cls, uid=None, username=None):
@@ -39,6 +50,7 @@ class UserModel:
         if user_rec:
             user.username = user_rec["username"]
             user.password = user_rec["password"]
+            user.actionMask = user_rec["actionMask"]
             user.uid = str(user_rec["_id"])
         else:
             return None
@@ -52,4 +64,8 @@ class UserModel:
         return rec["username"] if rec else None
 
     def get_access_level(self, action):
-        return True
+        if action in self.action_shift:  # TODO remove this "if", when actions are synchronized
+            if (self.actionMask >> self.action_shift[action]) % 2 == 1:
+                return True
+
+        return False
