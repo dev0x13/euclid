@@ -11,9 +11,9 @@ class UserModel:
         'isAdmin': 0,
         'manageParsers': 1,
         'manageExprData': 2,
-		'viewExprData': 3,
-		'createFormats': 4,
-		'generateReports': 5
+        'viewExprData': 3,
+        'createFormats': 4,
+        'generateReports': 5
     }
 
     def is_authenticated(self):
@@ -34,7 +34,8 @@ class UserModel:
         self.username = ""
         self.email = ""
         self.password = ""
-        self.actionMask = int(31)
+        # isAdmin
+        self.action_mask = int(31)
 
     @classmethod
     def load(cls, uid=None, username=None):
@@ -50,7 +51,7 @@ class UserModel:
         if user_rec:
             user.username = user_rec["username"]
             user.password = user_rec["password"]
-            user.actionMask = user_rec["actionMask"]
+            user.action_mask = user_rec["action_mask"]
             user.uid = str(user_rec["_id"])
         else:
             return None
@@ -63,9 +64,9 @@ class UserModel:
 
         return rec["username"] if rec else None
 
-    def get_access_level(self, action):
+    def check_access(self, action):
         if action in self.action_shift:  # TODO remove this "if", when actions are synchronized
-            if (self.actionMask >> self.action_shift[action]) % 2 == 1:
+            if (self.action_mask >> self.action_shift[action]) % 2 == 1:
                 return True
 
         return False

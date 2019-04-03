@@ -4,8 +4,8 @@ from flask import Blueprint, render_template, redirect, url_for
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, validators
-from app.fcomponents import Helpers
-from app.fcomponents.Helpers import ModelFactory
+from app.fcomponents import Common
+from app.fcomponents.Common import ModelFactory
 from app.fcomponents.User.models import UserModel
 
 module = Blueprint("Admin", __name__, url_prefix ="/admin")
@@ -32,7 +32,7 @@ class FormatForm(FlaskForm):
     title = StringField([validators.DataRequired()], render_kw={"placeholder": "Title"})
 
 
-@module.route("/apps", methods=Helpers.methods)
+@module.route("/apps", methods=Common.http_methods)
 @login_required
 def apps():
     form = FormatForm()
@@ -48,7 +48,7 @@ def apps():
         try:
             app.save()
         except ValueError as e:
-            Helpers.flash(e, category="danger")
+            Common.flash(e, category="danger")
         else:
             return redirect(url_for("Admin.apps"))
 

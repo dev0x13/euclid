@@ -1,9 +1,11 @@
-from flask import flash
+from functools import wraps
+
+from flask import flash, redirect, abort
 from app import db
 from bson.objectid import ObjectId
+from flask_login import current_user
 
-
-methods = ["GET", "POST"]
+http_methods = ["GET", "POST"]
 
 
 def flash_message(message, class_="danger"):
@@ -49,19 +51,18 @@ class Model:
         return cls.from_dict(rec) if rec else None
 
     @classmethod
+    def find_many(cls, cond):
+        recs = db[cls.table].find(cond)
+
+        return [cls.from_dict(rec) for rec in recs]
+
+    @classmethod
     def load(cls, uid):
         return cls.find_one({"_id": ObjectId(uid)})
 
     @classmethod
     def load_all(cls):
-        recs = db[cls.table].find({})
-
-        instances = []
-
-        for f in recs:
-            instances.append(cls.from_dict(f))
-
-        return instances
+        return cls.find_many({})
 
     @classmethod
     def delete(cls, uid):
@@ -82,6 +83,32 @@ class ModelFactory:
         return Cls
 
 
+def format_meta_eq(format_, meta, key_path="ROOT"):
+    for k in format_:
+        if k not in meta:
+            raise ValueError("Format doesn't match with metadata. Key missing: %s:%s" % (key_path, k))
+
+        if isinstance(format_[k], dict):
+            format_meta_eq(
+                format_[k],
+                meta[k],
+                key_path + ":" + str(k)
+            )
+        else:
+            if type(format_[k]) != type(meta[k]):
+                raise ValueError("Format doesn't match with metadata. Invalid value type for key: %s:%s" % (key_path, k))
 
 
+def check_access(action):
+    def deco(func):
 
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if current_user.check_access(action):
+                return func(*args, **kwargs)
+            else:
+                abort(403)
+
+        return wrapper
+
+    return deco

@@ -28,26 +28,26 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">Experimenting <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            {% if current_user.get_access_level("manageExprData") %}
+                            {% if current_user.check_access("manageExprData") %}
                                 <li><a href='{{ url_for("Batches.index") }}'>Batches</a></li>
                             {% endif %}
-                            {% if current_user.get_access_level("manageExprData") %}
+                            {% if current_user.check_access("manageExprData") %}
                                 <li><a href='#'>Experiments</a></li>
                             {% endif %}
                         </ul>
                     </li>
 
-                    {% if current_user.get_access_level("createFormats") %}
+                    {% if current_user.check_access("createFormats") %}
                         <li><a href="{{ url_for("Formats.index") }}">Formats</a></li>
                     {% endif %}
 
-                    {% if current_user.get_access_level("manageParsers") %}
+                    {% if current_user.check_access("manageParsers") %}
                         <li><a href="#">Parsers</a></li>
                     {% endif %}
 
                     <li><a href="#">Tools</a></li>
 
-                    {% if current_user.get_access_level("isAdmin") %}
+                    {% if current_user.check_access("isAdmin") %}
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                                aria-expanded="false">Admin <span class="caret"></span></a>

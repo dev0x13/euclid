@@ -45,6 +45,7 @@
 {% block page_content %}
     {% call macros.render_form(form, action_text="Create") %}
         {{ macros.render_field(form.format_uid) }}
+        {{ macros.render_field(form.exp_format_uid) }}
         <label for="meta_" class="control-label"><label for="format_uid">Metadata: </label> </label>
         <div id="editor">{{ form.meta_.data if form.meta_.data else "" }}</div>
         {{ macros.render_field(form.meta_) }}

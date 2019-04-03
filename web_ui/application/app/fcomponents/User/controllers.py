@@ -3,12 +3,12 @@ from flask_login import login_user, logout_user, login_required, current_user
 from app.fcomponents.User.forms import LoginForm
 from app.fcomponents.User.models import UserModel
 from werkzeug.security import check_password_hash
-import app.fcomponents.Helpers as Helpers
+import app.fcomponents.Common as Common
 
 module = Blueprint("User", __name__, url_prefix="/user")
 
 
-@module.route("/login", methods=Helpers.methods)
+@module.route("/login", methods=Common.http_methods)
 def login():
     logout_user()
     form = LoginForm()
@@ -18,7 +18,7 @@ def login():
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for("index"))
-        Helpers.flash_message("Wrong username or password")
+        Common.flash_message("Wrong username or password")
 
     return render_template("login.html", form=form, title="Login")
 

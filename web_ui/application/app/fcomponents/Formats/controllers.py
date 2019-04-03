@@ -3,9 +3,9 @@ from flask_login import login_required
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, StringField, validators
 import json
-import app.fcomponents.Helpers as Helpers
+import app.fcomponents.Common as Common
 from app import db
-from app.fcomponents.Helpers import ModelFactory
+from app.fcomponents.Common import ModelFactory
 
 module = Blueprint("Formats", __name__, url_prefix="/formats")
 
@@ -53,7 +53,7 @@ def index():
     return render_template("formats.html", formats=formats, title="Formats")
 
 
-@module.route("/create", methods=Helpers.methods)
+@module.route("/create", methods=Common.http_methods)
 @login_required
 def create():
     form = FormatForm()
@@ -64,7 +64,7 @@ def create():
         try:
             json.loads(format_json)
         except ValueError:
-            Helpers.flash("Unable to parse JSON", category="danger")
+            Common.flash("Unable to parse JSON", category="danger")
         else:
             format_ = FormatModel()
             format_.json_data = format_json
@@ -73,14 +73,14 @@ def create():
             try:
                 format_.save()
             except ValueError as e:
-                Helpers.flash(e, category="danger")
+                Common.flash(e, category="danger")
             else:
                 return redirect(url_for("Formats.index"))
 
     return render_template("create_format.html", form=form, title="Add format")
 
 
-@module.route("/delete/<uid>", methods=Helpers.methods)
+@module.route("/delete/<uid>", methods=Common.http_methods)
 @login_required
 def delete(uid):
     # TODO: check access
@@ -88,7 +88,7 @@ def delete(uid):
     try:
         FormatModel.delete(uid)
     except ValueError as e:
-        Helpers.flash(str(e), category="danger")
+        Common.flash(str(e), category="danger")
 
     return redirect(url_for("Formats.index"))
 
