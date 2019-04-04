@@ -5,7 +5,7 @@ import time
 from flask import Blueprint, redirect, url_for, render_template, request
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, SelectField
+from wtforms import HiddenField, SelectField, StringField, validators
 
 from app.fcomponents import Common
 from app.fcomponents.Formats.controllers import FormatModel
@@ -17,8 +17,9 @@ module = Blueprint("Batches", __name__, url_prefix="/batches")
 
 class BatchForm(FlaskForm):
     meta_ = HiddenField()
-    format_uid = SelectField("Format: ", default=None)
-    exp_format_uid = SelectField("Experiment format: ", default=None)
+    format_uid = SelectField("Format: ", default=None, validators=[validators.DataRequired()])
+    title = StringField("Title: ", validators=[validators.DataRequired()])
+    exp_format_uid = SelectField("Experiment format: ", default=None, validators=[validators.DataRequired()])
 
 
 class BatchModel(ModelFactory.produce("batches",
@@ -27,6 +28,7 @@ class BatchModel(ModelFactory.produce("batches",
                                           "creator_uid",
                                           "parsers_uids",
                                           "meta",
+                                          "title",
                                           "format_uid",
                                           "exp_format_uid"
                                       ])):
@@ -35,7 +37,7 @@ class BatchModel(ModelFactory.produce("batches",
         inst = super().load_all()
 
         for i in inst:
-            setattr(i, "creator_name", UserModel.get_name(i.creator_id))
+            setattr(i, "creator_name", UserModel.get_name(i.creator_uid))
             i.timestamp = datetime.fromtimestamp(i.timestamp)
 
         return inst
@@ -82,6 +84,7 @@ def create():
             else:
                 batch = BatchModel()
                 batch.meta = meta_json
+                batch.title = form.title.data
                 batch.creator_id = current_user.uid
                 batch.timestamp = time.time()
                 batch.format_uid = form.format_uid.data
@@ -95,7 +98,7 @@ def create():
                     return redirect(url_for("Batches.index"))
 
     return render_template(
-        "create_batch.html",
+        "batches/create_batch.html",
         form=form,
         formats=formats,
         title="Add batch"

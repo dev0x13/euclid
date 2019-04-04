@@ -1,0 +1,69 @@
+{% extends 'layout.html' %}
+
+{% block styles %}
+    {{ super() }}
+    <style type="text/css" media="screen">
+        #editor {
+            width: 100%;
+            height: 100px;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        let formats = {
+                {% for f in formats %}
+                    "{{ f.uid }}": `{{ f.json_data | safe }}`,
+                {% endfor %}
+            };
+
+        let batchesFormats = {
+                {% for b in batches %}
+                    "{{ b.uid }}": "{{ b.exp_format_uid }}",
+                {% endfor %}
+            };
+
+        let editor = ace.edit("editor", {
+           minLines: 20,
+           maxLines: 50,
+           autoScrollEditorIntoView: true,
+        });
+
+        editor.setTheme("ace/theme/dawn");
+        editor.session.setMode("ace/mode/json");
+        editor.getSession().on("change", function () {
+            $("#meta_").val(editor.getSession().getValue());
+        });
+
+        document.getElementById('editor').style.fontSize='16px';
+
+        let f = $("#format_uid"), b = $("#batch_uid");
+
+        f.change(function() {
+            editor.setValue(formats[f.val()]);
+        });
+
+        b.change(function() {
+            if (b.val() !== "0") {
+                f.prop('disabled', 'disabled');
+                f.val(batchesFormats[b.val()]);
+                editor.setValue(formats[f.val()]);
+            } else {
+                f.prop('disabled', false);
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block page_content %}
+    {% call macros.render_form(form, action_text="Add") %}
+        {{ macros.render_field(form.batch_uid) }}
+        {{ macros.render_field(form.format_uid) }}
+        <label for="meta_" class="control-label"><label for="format_uid">Metadata: *</label> </label>
+        <div id="editor">{{ form.meta_.data if form.meta_.data else "" }}</div>
+        {{ macros.render_field(form.meta_) }}
+    {% endcall %}
+{% endblock %}

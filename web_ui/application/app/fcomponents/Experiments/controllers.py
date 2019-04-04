@@ -5,7 +5,7 @@ import time
 from flask import Blueprint, redirect, url_for, render_template, request
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, SelectField
+from wtforms import HiddenField, SelectField, validators
 
 from app.fcomponents import Common
 from app.fcomponents.Formats.controllers import FormatModel
@@ -17,8 +17,8 @@ module = Blueprint("Experiments", __name__, url_prefix="/experiments")
 
 class ExpForm(FlaskForm):
     meta_ = HiddenField()
-    batch_uid = SelectField("Batch: ", default=None)
-    format_uid = SelectField("Format: ", default=None)
+    batch_uid = SelectField("Batch: ", default=0, coerce=str)
+    format_uid = SelectField("Format: ", default=0, coerce=str)
 
 
 class ExpModel(Common.ModelFactory.produce("experiments",
@@ -29,14 +29,17 @@ class ExpModel(Common.ModelFactory.produce("experiments",
                                           "meta",
                                           "format_uid",
                                           "batch_uid"
-                                          "locked"
+                                          "locked",
+                                          "num_samples"
                                       ])):
     @classmethod
     def load_all(cls):
         inst = super().load_all()
 
         for i in inst:
-            setattr(i, "creator_name", UserModel.get_name(i.creator_id))
+            setattr(i, "creator_name", UserModel.get_name(i.creator_uid))
+            batch = BatchModel.load(i.batch_uid)
+            setattr(i, "batch_title", batch.title if batch else None)
             i.timestamp = datetime.fromtimestamp(i.timestamp)
 
         return inst
@@ -75,16 +78,16 @@ def create():
 
     formats = FormatModel.load_all()
 
-    form.format_uid.choices = [(0, "Nothing selected")]
+    form.format_uid.choices = [("0", "Nothing selected")]
     form.format_uid.choices += [(a.uid, a.title) for a in formats]
 
     batches = BatchModel.load_all()
 
-    form.batch_uid.choices = [(0, "No batch")]
+    form.batch_uid.choices = [("0", "No batch")]
     form.batch_uid.choices += [(a.uid, a.title) for a in batches]
 
     if form.validate_on_submit():
-        if form.format_uid == 0:
+        if form.format_uid.data == "0":
             Common.flash("No format selected", category="danger")
         else:
             meta_json = form.meta_.data
@@ -110,11 +113,17 @@ def create():
                         return redirect(url_for("Experiments.index"))
                     else:
                         return redirect(url_for("Batches.view", uid=exp.batch_uid))
-
+    for field, errors in form.errors.items():
+        for error in errors:
+            Common.flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ), 'error')
     return render_template(
         "experiments/create_experiment.html",
         form=form,
         formats=formats,
+        batches=batches,
         title="Add experiment"
     )
 

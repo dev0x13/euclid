@@ -33,7 +33,7 @@ class FormatModel(ModelFactory.produce("formats", ["json_data", "title"])):
 
         batch = BatchModel.find_one({"format_uid": uid})
         if batch:
-            raise ValueError("The format is used by following batch: <b>%s</b>" % batch.uid)
+            raise ValueError("The format is used by following batch: <b>%s</b>" % batch.title)
 
         # TODO: Here come the same logic for experiments and samples:
         # if BatchModel.find_one({"format_uid": uid}):

@@ -32,7 +32,7 @@
                                 <li><a href='{{ url_for("Batches.index") }}'>Batches</a></li>
                             {% endif %}
                             {% if current_user.check_access("manageExprData") %}
-                                <li><a href='#'>Experiments</a></li>
+                                <li><a href='{{ url_for("Experiments.index") }}'>Experiments</a></li>
                             {% endif %}
                         </ul>
                     </li>
