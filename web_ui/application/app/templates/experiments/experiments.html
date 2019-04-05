@@ -34,7 +34,7 @@
     <tr>
         <th data-field="d" data-sortable="true">UID</th>
         <th data-field="a" data-sortable="true">Creation time</th>
-        <th data-field="e" data-sortable="true">batch</th>
+        <th data-field="e" data-sortable="true">Batch</th>
         <th data-field="b" data-sortable="true">Creator</th>
         <th data-field="c" data-sortable="false">Meta</th>
         <th class="col-xs-1"></th>
@@ -46,7 +46,7 @@
         <td>{{ f.uid }}</td>
         <td>{{ f.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
         <td>
-            {% if f.batch_uid != 0 %}
+            {% if f.batch_uid != "0" %}
                 <a href="{{ url_for("Batches.view", uid=f.batch_uid) }}">
                     {{ f.batch_title }}
                 </a>
@@ -60,6 +60,9 @@
         </td>
         <td>
             <a class="btn btn-default" href="{{ url_for("Experiments.view", uid=f.uid) }}" role="button">{{ utils.icon('eye-open') }}</a>
+            {% if not f.locked %}
+                <span class="label label-danger">Unlocked</span>
+            {% endif %}
         </td>
     </tr>
     {% endfor %}

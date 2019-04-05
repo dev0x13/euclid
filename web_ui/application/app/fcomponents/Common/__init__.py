@@ -68,6 +68,10 @@ class Model:
     def delete(cls, uid):
         db[cls.table].remove({"_id": ObjectId(uid)})
 
+    @classmethod
+    def update(cls, cond, upd):
+        db[cls.table].update(cond, {"$set": upd}, upsert=False)
+
 
 class ModelFactory:
     @staticmethod

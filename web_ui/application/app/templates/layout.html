@@ -5,7 +5,7 @@
 {% block styles %}
     {{ super() }}
     <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
-    <link rel='stylesheet' type='text/css' href='{{ url_for("static", filename = "css/journal.css") }}'>
+    <link rel='stylesheet' type='text/css' href='{{ url_for("static", filename = "css/readable.css") }}'>
 {% endblock %}
 
 {% block title %}
@@ -42,7 +42,7 @@
                     {% endif %}
 
                     {% if current_user.check_access("manageParsers") %}
-                        <li><a href="#">Parsers</a></li>
+                        <li><a href="{{ url_for("Parsers.index") }}">Parsers</a></li>
                     {% endif %}
 
                     <li><a href="#">Tools</a></li>
@@ -53,7 +53,6 @@
                                aria-expanded="false">Admin <span class="caret"></span></a>
                             <ul class="dropdown-menu">
                                 <li><a href='#'>Users</a></li>
-                                <li><a href='#'>Access</a></li>
                                 <li><a href='{{ url_for("Admin.apps") }}'>Apps</a></li>
                             </ul>
                         </li>

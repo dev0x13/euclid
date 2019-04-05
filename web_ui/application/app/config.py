@@ -10,4 +10,5 @@ class AppConfig:
     DB_USER = ""
     DB_PWD = ""
     DB_NAME = ""
+    UPLOAD_FOLDER = '/tmp'
 
