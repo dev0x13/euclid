@@ -55,11 +55,22 @@
                 f.prop('disabled', false);
             }
         });
+
+        if (b.val() !== "0") {
+            f.prop('disabled', 'disabled');
+            f.val(batchesFormats[b.val()]);
+            if (editor.getSession().getValue() === "") {
+                editor.setValue(formats[f.val()]);
+            }
+        } else {
+            f.prop('disabled', false);
+        }
     </script>
 {% endblock %}
 
 {% block page_content %}
     {% call macros.render_form(form, action_text="Add") %}
+        {{ form.hidden_tag() }}
         {{ macros.render_field(form.batch_uid) }}
         {{ macros.render_field(form.format_uid) }}
         <label for="meta_" class="control-label"><label for="format_uid">Metadata: *</label> </label>

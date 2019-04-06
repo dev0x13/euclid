@@ -21,9 +21,9 @@
             <div class='btn-group' role='group'>
                 {% if not experiment.locked %}
                     {{ macros.render_button_with_confirm(utils.icon('lock'), 'btn btn-default', url_for("Experiments.lock", uid=experiment.uid)) }}
-                    <button type='button' class='btn btn-default' title='Delete'>{{ utils.icon('trash') }}</button>
+                     {{ macros.render_button_with_confirm(utils.icon('trash'), 'btn btn-default', url_for("Experiments.delete", uid=experiment.uid)) }}
                 {% else %}
-                    <button type='button' class='btn btn-default' title='Export'>{{ utils.icon('floppy-disk') }}</button>
+                    <button type='button' class='btn btn-default' title='Export'>{{ utils.icon('download-alt') }}</button>
                 {% endif %}
             </div>
         </div>
@@ -63,7 +63,7 @@
               </form>
               <hr>
           {% endif %}
-          <table class='table table-striped table-hover' data-pagination="true" data-toggle="table" id="experiments">
+          <table class='table table-striped table-hover' data-pagination="true" data-toggle="table" id="samples">
               <thead>
                   <tr>
                       <th data-field="d" data-sortable="true">File</th>

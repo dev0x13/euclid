@@ -69,9 +69,8 @@
         pass
 
     def process_batch(batch):
-        pass"
-}}
-                </div>
+        pass"}}
+</div>
                 {{ macros.render_field(form.code) }}
                 <button type="button" class="btn btn-default" onclick="validate()">Validate</button>
             {% endcall %}
@@ -80,7 +79,7 @@
             <h4>Debug output:</h4>
             <hr>
             <div id="debug_output"
-                    style="height: 296px; font-family: monospace; background-color: #000000"></div>
+                    style="overflow: auto; height: 296px; max-height: 296px; font-family: monospace; background-color: #000000"></div>
         </div>
     </div>
 {% endblock %}

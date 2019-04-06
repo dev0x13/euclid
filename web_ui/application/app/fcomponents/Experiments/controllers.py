@@ -9,6 +9,7 @@ from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from werkzeug.utils import secure_filename
 from wtforms import HiddenField, SelectField, validators
+import shutil
 
 from app.fcomponents import Common
 from app.fcomponents.Formats.controllers import FormatModel
@@ -100,7 +101,7 @@ class ExpModel(Common.ModelFactory.produce("experiments",
     def lock(cls, uid):
         samples = SampleModel.load_all_by_experiment(uid)
 
-        cls.update({"_id": ObjectId(uid)}, {"locked": True, "num_samples": samples.count()})
+        cls.update({"_id": ObjectId(uid)}, {"locked": True, "num_samples": len(samples)})
 
     @classmethod
     def delete(cls, uid):
@@ -110,7 +111,9 @@ class ExpModel(Common.ModelFactory.produce("experiments",
             if exp.locked:
                 raise ValueError("Experiment is locked")
 
-            os.rmdir(os.path.join(AppConfig.UPLOAD_FOLDER, uid))
+            data_path = os.path.join(AppConfig.UPLOAD_FOLDER, uid)
+            if os.path.exists(data_path):
+                shutil.rmtree(data_path)
 
             super().delete(uid)
 
@@ -150,10 +153,12 @@ def create():
                 Common.flash("Unable to parse JSON", category="danger")
             else:
                 exp = ExpModel()
+                exp.locked = False
                 exp.meta = meta_json
                 exp.creator_uid = current_user.uid
                 exp.batch_uid = form.batch_uid.data
                 exp.timestamp = time.time()
+                exp.num_samples = 0
                 exp.format_uid = form.format_uid.data if exp.batch_uid == "0" else BatchModel.load(exp.batch_uid).format_uid
 
                 try:
@@ -165,12 +170,14 @@ def create():
                         return redirect(url_for("Experiments.index"))
                     else:
                         return redirect(url_for("Batches.view", uid=exp.batch_uid))
-    for field, errors in form.errors.items():
-        for error in errors:
-            Common.flash(u"Error in the %s field - %s" % (
-                getattr(form, field).label.text,
-                error
-            ), 'error')
+    else:
+        batch_uid = request.args.get("batch_uid")
+        batch = BatchModel.load(batch_uid) if batch_uid else None
+
+        if batch_uid and batch:
+            form.batch_uid.default = batch_uid
+            form.process()
+
     return render_template(
         "experiments/create_experiment.html",
         form=form,
@@ -211,6 +218,8 @@ def view(uid):
 
                 sample.save()
 
+        return redirect(url_for("Experiments.view", uid=uid))
+
     # TODO: parser logic
 
     return render_template("experiments/experiment.html", experiment=experiment, samples=samples, title="Experiment")
@@ -230,7 +239,7 @@ def delete(uid):
     try:
         ExpModel.delete(uid)
     except ValueError as e:
-        Common.flash(e, category="danger")
+        Common.flash(str(e), category="danger")
 
     return redirect(url_for("Experiments.index"))
 
