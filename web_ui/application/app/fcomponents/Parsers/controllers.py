@@ -12,6 +12,7 @@ from app.fcomponents import Common
 from app.fcomponents.Formats.controllers import FormatModel
 from app.fcomponents.Common import ModelFactory
 from app.fcomponents.User.models import UserModel
+from app.bcomponents.parser_backend.executor import PARSER_BASE
 
 module = Blueprint("Parsers", __name__, url_prefix="/parsers")
 
@@ -63,18 +64,7 @@ def parser_tmp_module(*args, **kwds):
 
 
 def validate_parser(code):
-    code = '''
-class Parser:
-    def __init__(self):
-        self.text_buffer = ""
-        self.image_buffer = []
-
-    def print_text(self, text):
-        self.text_buffer += text
-
-    def print_image(self, image):
-        self.image_buffer.append(image)
-     \n\n''' + code
+    code = PARSER_BASE + code
 
     tmp_module_uid = "tmp_%s" % uuid.uuid4().hex
 
@@ -141,7 +131,20 @@ def create():
     form = ParserForm()
 
     if form.validate_on_submit():
-        pass
+        code, msg = validate_parser(form.code.data)
+
+        if code != 0:
+            Common.flash("Validation error: " + msg, category="danger")
+        else:
+            parser = ParserModel()
+            parser.title = form.title.data
+            parser.code = form.code.data
+            parser.creator_uid = current_user.uid
+
+            parser.save()
+
+            return redirect(url_for("Parsers.index"))
+
 
     return render_template(
         "parsers/parser.html",

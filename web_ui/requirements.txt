@@ -4,3 +4,4 @@ flask-login
 flask-wtf
 flask_script
 pymongo
+docker
