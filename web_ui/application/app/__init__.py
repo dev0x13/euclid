@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 
 from flask import Flask, request, redirect, url_for, render_template
 from flask_login import LoginManager, current_user
@@ -42,6 +43,12 @@ def create_app():
     app.register_blueprint(ToolsModule.module)
     app.register_blueprint(UsersModule.module)
     app.register_blueprint(FormatsModule.module)
+
+    if not os.path.exists(AppConfig.PARSERS_WORKSPACES_FOLDER):
+        os.mkdir(AppConfig.PARSERS_WORKSPACES_FOLDER)
+
+    if not os.path.exists(AppConfig.PARSERS_OUTPUT_ROOT):
+        os.mkdir(AppConfig.PARSERS_OUTPUT_ROOT)
 
     @app.before_request
     def check_valid_login():

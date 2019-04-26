@@ -28,6 +28,9 @@
                         <button type='button' class='btn btn-default'
                                 title='Export'>{{ utils.icon('download-alt') }}</button>
                     {% endif %}
+                    <a class="btn btn-primary" data-toggle="modal" data-target="#parsers_modal" role="button" title="Attach parser">
+                            {{ utils.icon('console') }}
+                    </a>
                 </div>
             </div>
         </div>
@@ -81,10 +84,42 @@
             <h3>Parsers</h3>
             <hr>
             <h4>Attached parsers</h4>
+            {% for p in batch_parsers %}
+                <div class="panel panel-default">
+                    <div class="panel-body" style="padding: 0px">
+                        <a class="btn btn-sm" href="{{ url_for("Parsers.view", uid=p.uid) }}"
+                               role="button">{{ p.title }}</a>
+                        <div class="pull-right">
+                            {{
+                               macros.render_button_with_confirm(
+                                   utils.icon('remove'),
+                                   'btn btn-sm',
+                                   url_for("Batches.remove_parser", batch_uid=batch.uid, parser_uid=p.uid))
+                            }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
             <hr>
             <h4>Output</h4>
             Mock data: 1245
             <img width="100%" src="{{ url_for("static", filename="mock/parser_output.png") }}"/>
+        </div>
+    </div>
+    <div class='modal fade' id='parsers_modal' tabindex='-1' role='dialog' aria-labelledby='parsers_modal_lanel'
+         aria-hidden='true'>
+        <div class='modal-dialog'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>
+                    <h4 class='modal-title' id='handbook_modal_label'>Attach parser</h4>
+                </div>
+                <div class='modal-body'>
+                    {% call macros.render_form(form, action_text="Attach") %}
+                        {{ macros.render_field(form.parser_uid) }}
+                    {% endcall %}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

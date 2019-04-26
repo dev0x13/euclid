@@ -13,6 +13,8 @@ from app.fcomponents.Formats.controllers import FormatModel
 from app.fcomponents.Common import ModelFactory
 from app.fcomponents.User.models import UserModel
 
+from app.bcomponents.parser_backend.executor import execute
+
 module = Blueprint("Batches", __name__, url_prefix="/batches")
 
 
@@ -21,6 +23,10 @@ class BatchForm(FlaskForm):
     format_uid = SelectField("Format: ", default=None, validators=[validators.DataRequired()])
     title = StringField("Title: ", validators=[validators.DataRequired()])
     exp_format_uid = SelectField("Experiment format: ", default=None, validators=[validators.DataRequired()])
+
+
+class AttachParserForm(FlaskForm):
+    parser_uid = SelectField("Parser: ", default=None, validators=[validators.DataRequired()])
 
 
 class BatchModel(ModelFactory.produce("batches",
@@ -114,6 +120,7 @@ def create():
                 batch.timestamp = time.time()
                 batch.format_uid = form.format_uid.data
                 batch.exp_format_uid = form.exp_format_uid.data
+                batch.parsers_uid = []
                 batch.locked = False
 
                 try:
@@ -131,16 +138,62 @@ def create():
     )
 
 
-@module.route("/<uid>")
+@module.route("/<uid>", methods=Common.http_methods)
 @login_required
 def view(uid):
     from app.fcomponents.Experiments.controllers import ExpModel
+    from app.fcomponents.Parsers.controllers import ParserModel
 
     batch = BatchModel.load(uid)
     experiments = ExpModel.load_all_by_batch(uid)
 
-    return render_template("batches/batch.html", batch=batch, experiments=experiments, title="Batch")
+    form = AttachParserForm()
 
+    batch_parsers = []
+
+    if batch.parsers_uids:
+        for p in batch.parsers_uids:
+            execute(ParserModel.load(p), batch=batch)
+            batch_parsers.append(ParserModel.load(p))
+
+    form.parser_uid.choices = [(a.uid, a.title) for a in ParserModel.load_all()]
+
+    if form.validate_on_submit():
+        if not batch.parsers_uids:
+            batch.parsers_uids = []
+
+        new_parser_uid = form.parser_uid.data
+
+        if new_parser_uid not in batch.parsers_uids:
+            BatchModel.update(
+                {"_id": ObjectId(uid)},
+                {"parsers_uids": batch.parsers_uids + [form.parser_uid.data]}
+            )
+
+    return render_template(
+        "batches/batch.html",
+        form=form,
+        batch=batch,
+        batch_parsers=batch_parsers,
+        experiments=experiments,
+        title="Batch"
+    )
+
+
+@module.route("/<batch_uid>/remove_parser/<parser_uid>", methods=Common.http_methods)
+@login_required
+def remove_parser(batch_uid, parser_uid):
+    batch = BatchModel.load(batch_uid)
+
+    if parser_uid in batch.parsers_uids:
+        new_parsers_uids = batch.parsers_uids.remove(parser_uid)
+
+        BatchModel.update(
+            {"_id": ObjectId(batch_uid)},
+            {"parsers_uids": new_parsers_uids}
+        )
+
+    return redirect(url_for("Batches.view", uid=batch_uid))
 
 @module.route("/<uid>/delete")
 @login_required

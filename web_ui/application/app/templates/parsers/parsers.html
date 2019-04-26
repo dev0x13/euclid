@@ -27,11 +27,13 @@
     <tbody>
     {% for f in parsers %}
     <tr>
-        <td>{{ f.uid }}</td>
+        <td><a class="btn btn-sm" href="{{ url_for("Parsers.view", uid=f.uid) }}"
+               role="button">{{ f.title }}</a>
+        </td>
         <td>{{ f.creator_name }}</td>
         <td>{{ f.title }}</td>
         <td>{{ macros.render_button_with_confirm(utils.icon('trash'), 'btn btn-default', url_for("Parsers.delete", uid=f.uid)) }}</td>
-    </tr>
+    </td>
     {% endfor %}
     </tbody>
 </table>

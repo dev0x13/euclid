@@ -28,59 +28,15 @@
            autoScrollEditorIntoView: true,
         });
 
-        let code = $("#code");
-
         editor.setTheme("ace/theme/dawn");
         editor.session.setMode("ace/mode/python");
-        editor.getSession().on("change", function () {
-            code.val(editor.getSession().getValue());
-        });
+        editor.setReadOnly(true);
 
-        code.val(editor.getSession().getValue());
         document.getElementById('editor').style.fontSize='16px';
-
-        function validate() {
-            $.ajax({
-                type: "POST",
-                url: "/parsers/validate",
-                data: {code: editor.getSession().getValue()},
-                success: function (data) {
-                    let class_ = data[0] === 1 ? "error" : "info";
-                    let text = ($("#debug_output").html() != "" ? "<br>" : "" ) +
-                               "<span class='" + class_ + "'>" +
-                               (data[0] === 1 ? "Error: " + data[1] : data[1]) + "</span>";
-                    $("#debug_output").html($("#debug_output").html() + text);
-                }
-            });
-        }
     </script>
 {% endblock %}
 
 {% block page_content %}
-    <div class="row">
-        <div class='col-xs-8'>
-            {% call macros.render_form(form, action_text="Compile") %}
-                {{ macros.render_field(form.title, label_visible=False) }}
-                <div id="editor">{{ form.code.data if form.code.data else
-"class ParserImpl(Parser):
-    def process_sample(sample):
-        pass
-
-    def process_experiment(experiment):
-        pass
-
-    def process_batch(batch):
-        pass"}}
-</div>
-                {{ macros.render_field(form.code) }}
-                <button type="button" class="btn btn-default" onclick="validate()">Validate</button>
-            {% endcall %}
-        </div>
-        <div class='col-xs-4'>
-            <h4>Debug output:</h4>
-            <hr>
-            <div id="debug_output"
-                    style="overflow: auto; height: 296px; max-height: 296px; font-family: monospace; background-color: #000000"></div>
-        </div>
-    </div>
+    <h3>{{ parser.title }}</h3>
+    <div id="editor">{{ parser.code }}
 {% endblock %}

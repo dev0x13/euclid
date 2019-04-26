@@ -3,7 +3,7 @@ import sys
 import inspect
 import uuid
 
-from flask import Blueprint, redirect, url_for, render_template, request, jsonify
+from flask import Blueprint, redirect, url_for, render_template, request, jsonify, abort
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, SelectField, validators, StringField
@@ -45,9 +45,22 @@ class ParserModel(ModelFactory.produce("parsers",
 
         super().save()
 
+    @classmethod
+    def delete(cls, uid):
+        from app.fcomponents.Batches.controllers import BatchModel
+
+        batches = BatchModel.load_all()
+
+        for b in batches:
+            if b.parsers_uids:
+                if uid in b.parsers_uids:
+                    raise ValueError("Some batches use this parser")
+
+        super().delete(uid)
+
 
 # This is a draft for parsers validation.
-# Note: wacked fo now, will be done inside Docker container
+# Note: wacked for now, will be done inside Docker container
 
 sys.path.append("/tmp/")
 
@@ -145,9 +158,8 @@ def create():
 
             return redirect(url_for("Parsers.index"))
 
-
     return render_template(
-        "parsers/parser.html",
+        "parsers/create_parser.html",
         form=form,
         title="Create parser"
     )
@@ -156,13 +168,10 @@ def create():
 @module.route("/delete/<uid>")
 @login_required
 def delete(uid):
-    # parser = ParserModel.load(uid)
-    #
-    # TODO: Here come the checking if there are any experiments, batches or samples
-    # using this parser
-    #
-
-    ParserModel.delete(uid)
+    try:
+        ParserModel.delete(uid)
+    except ValueError as e:
+        Common.flash(str(e), category="danger")
 
     return redirect(url_for("Parsers.index"))
 
@@ -170,9 +179,16 @@ def delete(uid):
 @module.route("/view/<uid>")
 @login_required
 def view(uid):
-    # TODO: implement
+    parser = ParserModel.load(uid)
 
-    return redirect(url_for("Parsers.index"))
+    if not parser:
+        abort(404)
+
+    return render_template(
+        "parsers/parser.html",
+        parser=parser,
+        title="Parser"
+    )
 
 
 @module.route("/docs")

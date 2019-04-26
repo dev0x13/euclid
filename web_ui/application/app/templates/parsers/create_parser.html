@@ -1,0 +1,86 @@
+{% extends 'layout.html' %}
+
+{% block styles %}
+    {{ super() }}
+    <style type="text/css" media="screen">
+        #editor {
+            width: 100%;
+            height: 100px;
+        }
+
+        .info {
+            color: #ffffff;
+        }
+
+        .error {
+            color: #8b211e;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.3/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        let editor = ace.edit("editor", {
+           minLines: 20,
+           maxLines: 50,
+           autoScrollEditorIntoView: true,
+        });
+
+        let code = $("#code");
+
+        editor.setTheme("ace/theme/dawn");
+        editor.session.setMode("ace/mode/python");
+        editor.getSession().on("change", function () {
+            code.val(editor.getSession().getValue());
+        });
+
+        code.val(editor.getSession().getValue());
+        document.getElementById('editor').style.fontSize='16px';
+
+        function validate() {
+            $.ajax({
+                type: "POST",
+                url: "/parsers/validate",
+                data: {code: editor.getSession().getValue()},
+                success: function (data) {
+                    let class_ = data[0] === 1 ? "error" : "info";
+                    let text = ($("#debug_output").html() != "" ? "<br>" : "" ) +
+                               "<span class='" + class_ + "'>" +
+                               (data[0] === 1 ? "Error: " + data[1] : data[1]) + "</span>";
+                    $("#debug_output").html($("#debug_output").html() + text);
+                }
+            });
+        }
+    </script>
+{% endblock %}
+
+{% block page_content %}
+    <div class="row">
+        <div class='col-xs-8'>
+            {% call macros.render_form(form, action_text="Compile") %}
+                {{ macros.render_field(form.title, label_visible=False) }}
+                <div id="editor">{{ form.code.data if form.code.data else
+"class ParserImpl(Parser):
+    def process_sample(self, sample):
+        pass
+
+    def process_experiment(self, experiment):
+        pass
+
+    def process_batch(self, batch):
+        pass"}}
+</div>
+                {{ macros.render_field(form.code) }}
+                <button type="button" class="btn btn-default" onclick="validate()">Validate</button>
+            {% endcall %}
+        </div>
+        <div class='col-xs-4'>
+            <h4>Debug output:</h4>
+            <hr>
+            <div id="debug_output"
+                    style="overflow: auto; height: 296px; max-height: 296px; font-family: monospace; background-color: #000000"></div>
+        </div>
+    </div>
+{% endblock %}

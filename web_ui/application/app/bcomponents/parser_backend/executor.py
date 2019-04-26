@@ -2,10 +2,10 @@ import json
 import os
 import uuid
 import docker
+import pickle
 
 from app.config import AppConfig
 
-from app.fcomponents.Experiments.controllers import ExpModel
 from docker.errors import ContainerError
 
 PARSER_BASE = '''
@@ -36,6 +36,8 @@ class Parser:
 
 
 def execute(parser, batch=None, experiment=None, sample=None):
+    from app.fcomponents.Experiments.controllers import ExpModel, SampleModel
+
     tmp_workspace_uid = str(uuid.uuid4())
     tmp_workspace_path = os.path.join(AppConfig.PARSERS_WORKSPACES_FOLDER, tmp_workspace_uid)
 
@@ -50,20 +52,49 @@ def execute(parser, batch=None, experiment=None, sample=None):
         f.write(parser.code)
 
     if batch:
-        with open(os.path.join(tmp_workspace_path, "batch.json"), "w") as f:
-            f.write(json.dumps(batch))
+        data = {
+            "meta": batch.meta,
+            "experiments": []
+        }
+
+        for exp in ExpModel.load_all_by_batch(batch.uid):
+            samples = [s.file for s in SampleModel.load_all_by_experiment(exp.uid)]
+
+            data["experiments"].append(
+                {"meta": exp.meta, "samples": samples}
+            )
+
+        with open(os.path.join(tmp_workspace_path, "batch.pkl"), "wb") as f:
+            pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
     elif experiment:
-        with open(os.path.join(tmp_workspace_path, "experiment.json"), "w") as f:
-            f.write(json.dumps(experiment))
+        data = {
+            "meta": batch.meta,
+            "samples": [{"file": s.file} for s in SampleModel.load_all_by_experiment(experiment.uid)]
+        }
+
+        with open(os.path.join(tmp_workspace_path, "experiment.pkl"), "wb") as f:
+            pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
     elif sample:
-        with open(os.path.join(tmp_workspace_path, "sample.json"), "w") as f:
-            f.write(json.dumps(sample))
+        data = {"file": sample.file}
+
+        with open(os.path.join(tmp_workspace_path, "sample.pkl"), "wb") as f:
+            pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
 
     docker_client = docker.from_env()
 
     docker_volumes = {}
 
+    docker_volumes[tmp_workspace_path] = {
+        "bind": "/env/workspace",
+        "mode": "ro"
+    }
+
     if batch:
+        output_path = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_BATCHES, batch.uid, "%s.txt" % parser.uid)
+
+        if os.path.exists(output_path):
+            return 1
+
         for exp in ExpModel.load_all_by_batch(batch.uid):
             docker_volumes[os.path.join(AppConfig.UPLOAD_FOLDER, exp.uid)] = {
                 "bind": "/env/input/%s" % exp.uid,
@@ -74,6 +105,11 @@ def execute(parser, batch=None, experiment=None, sample=None):
             "mode": "rw"
         }
     elif experiment:
+        output_path = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, experiment.uid, "%s.txt" % parser.uid)
+
+        if os.path.exists(output_path):
+            return 1
+
         docker_volumes[os.path.join(AppConfig.UPLOAD_FOLDER, experiment.uid)] = {
             "bind": "/env/input/%s" % experiment.uid,
             "mode": "ro"
@@ -83,6 +119,11 @@ def execute(parser, batch=None, experiment=None, sample=None):
             "mode": "rw"
         }
     elif sample:
+        output_path = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_SAMPLES, sample.uid, "%s.txt" % parser.uid)
+
+        if os.path.exists(output_path):
+            return 1
+
         docker_volumes[os.path.join(AppConfig.UPLOAD_FOLDER, sample.experiment_uid, sample.file)] = {
             "bind": "/env/input/%s/%s" % (sample.experiment_uid, sample.file),
             "mode": "ro"
@@ -92,7 +133,9 @@ def execute(parser, batch=None, experiment=None, sample=None):
             "mode": "rw"
         }
 
-    try:
-        output = docker_client.containers.run("euclid_parser_env", volumes=docker_volumes)
-    except ContainerError:
-        pass
+    #try:
+    output = docker_client.containers.run("euclid_parser_env", volumes=docker_volumes)
+    #except ContainerError:
+    #    pass
+
+    return 1

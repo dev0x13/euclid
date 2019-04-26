@@ -47,7 +47,6 @@ class ExpModel(Common.ModelFactory.produce("experiments",
                                       [
                                           "timestamp",
                                           "creator_uid",
-                                          "parsers_uids",
                                           "meta",
                                           "format_uid",
                                           "batch_uid"

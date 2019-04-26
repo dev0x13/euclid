@@ -1,4 +1,5 @@
 import json
+import pickle
 import os
 
 from workspace.parser import ParserImpl, PARSER_UID
@@ -9,21 +10,21 @@ sample = None
 
 parser = ParserImpl()
 
-if os.path.exists("batch.json"):
-    with open("batch.json", "r") as f:
-        batch = json.loads(f.read())
+if os.path.exists("workspace/batch.pkl"):
+    with open("workspace/batch.pkl", "rb") as f:
+        batch = pickle.load(f)
 
         parser.process_batch(batch)
-elif os.path.exists("experiment.json"):
-    with open("experiment.json", "r") as f:
-        experiment = json.loads(f.read())
+elif os.path.exists("workspace/experiment.pkl"):
+    with open("workspace/experiment.pkl", "rb") as f:
+        experiment = pickle.load(f)
 
-        parser.process_experiment(batch)
-elif os.path.exists("sample.json"):
-    with open("sample.json", "r") as f:
-        sample = json.loads(f.read())
+        parser.process_experiment(experiment)
+elif os.path.exists("workspace/sample.pkl"):
+    with open("workspace/sample.pkl", "rb") as f:
+        sample = pickle.load(f)
 
-        parser.process_experiment(batch)
+        parser.process_experiment(sample)
 
 for i, img in enumerate(parser.image_buffer):
     with open("output/%s_img_%i.%s" % (PARSER_UID, i, img["format"]), "wb") as f:
