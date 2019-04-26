@@ -87,14 +87,14 @@
             {% for p in batch_parsers %}
                 <div class="panel panel-default">
                     <div class="panel-body" style="padding: 0px">
-                        <a class="btn btn-sm" href="{{ url_for("Parsers.view", uid=p.uid) }}"
-                               role="button">{{ p.title }}</a>
+                        <a class="btn btn-sm" href="{{ url_for("Parsers.view", uid=p["parser"].uid) }}"
+                               role="button">{{ p["parser"].title }}</a>
                         <div class="pull-right">
                             {{
                                macros.render_button_with_confirm(
                                    utils.icon('remove'),
                                    'btn btn-sm',
-                                   url_for("Batches.remove_parser", batch_uid=batch.uid, parser_uid=p.uid))
+                                   url_for("Batches.remove_parser", batch_uid=batch.uid, parser_uid=p["parser"].uid))
                             }}
                         </div>
                     </div>
@@ -102,8 +102,16 @@
             {% endfor %}
             <hr>
             <h4>Output</h4>
-            Mock data: 1245
-            <img width="100%" src="{{ url_for("static", filename="mock/parser_output.png") }}"/>
+            {% for p in batch_parsers %}
+                <div class="jumbotron" style="padding: 10px;">
+                    <b>{{ p["parser"].title }}</b>
+                    <hr>
+                    {{ p["output"]["text"] }}
+                    {% for i in p["output"]["img"] %}
+                        <img width="100%" src="{{ url_for("Batches.parser_img_output", img=i, batch_uid=batch.uid) }}"/>
+                    {% endfor %}
+                </div>
+            {% endfor %}
         </div>
     </div>
     <div class='modal fade' id='parsers_modal' tabindex='-1' role='dialog' aria-labelledby='parsers_modal_lanel'

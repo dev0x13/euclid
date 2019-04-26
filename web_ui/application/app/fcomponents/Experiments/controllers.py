@@ -18,6 +18,8 @@ from app.fcomponents.User.models import UserModel
 
 from app.config import AppConfig
 
+from app.bcomponents.parser_backend.executor import execute
+
 module = Blueprint("Experiments", __name__, url_prefix="/experiments")
 
 
@@ -189,6 +191,8 @@ def create():
 @module.route("/<uid>", methods=Common.http_methods)
 @login_required
 def view(uid):
+    from app.fcomponents.Parsers.controllers import ParserModel
+
     experiment = ExpModel.load(uid)
 
     if not experiment:
@@ -197,6 +201,42 @@ def view(uid):
     samples = SampleModel.load_all_by_experiment(uid)
 
     filepath = os.path.join(AppConfig.UPLOAD_FOLDER, uid)
+
+    batch = BatchModel.load(experiment.batch_uid)
+
+    parsers_output_dir = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, uid)
+
+    experiment_parsers = []
+
+    if batch.parsers_uids:
+        for p in batch.parsers_uids:
+            execute(ParserModel.load(p), experiment=experiment)
+
+            parser_output = {}
+
+            parser_txt = os.path.join(parsers_output_dir, "%s.txt" % p)
+
+            if os.path.exists(parser_txt):
+                with open(parser_txt, "r") as txt:
+                    parser_output["text"] = txt.read()
+
+            parser_output["img"] = []
+            i = 0
+
+            while True:
+                img = "%s_img_%i.png" % (p, i)
+                parser_img = os.path.join(parsers_output_dir, img)
+
+                if os.path.exists(parser_img):
+                    parser_output["img"].append(img)
+                    i += 1
+                else:
+                    break
+
+            experiment_parsers.append({
+                "parser": ParserModel.load(p),
+                "output": parser_output
+            })
 
     if "samples[]" in request.files:
         files = request.files.getlist('samples[]', None)
@@ -219,9 +259,13 @@ def view(uid):
 
         return redirect(url_for("Experiments.view", uid=uid))
 
-    # TODO: parser logic
-
-    return render_template("experiments/experiment.html", experiment=experiment, samples=samples, title="Experiment")
+    return render_template(
+        "experiments/experiment.html",
+        experiment=experiment,
+        experiment_parsers=experiment_parsers,
+        samples=samples,
+        title="Experiment"
+    )
 
 
 @module.route("/<uid>/lock")
@@ -256,3 +300,7 @@ def download_sample(sample_uid):
                      sample.experiment_uid),
         sample.file, as_attachment=True)
 
+
+@module.route('/<exp_uid>/poutput/<img>')
+def parser_img_output(exp_uid, img):
+    return send_from_directory(os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, exp_uid), img, as_attachment=False)

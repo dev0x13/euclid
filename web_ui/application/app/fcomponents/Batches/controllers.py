@@ -1,9 +1,10 @@
+import os
 from datetime import datetime
 import json
 import time
 
 from bson import ObjectId
-from flask import Blueprint, redirect, url_for, render_template, request
+from flask import Blueprint, redirect, url_for, render_template, request, send_from_directory
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, SelectField, StringField, validators
@@ -14,6 +15,8 @@ from app.fcomponents.Common import ModelFactory
 from app.fcomponents.User.models import UserModel
 
 from app.bcomponents.parser_backend.executor import execute
+
+from app.config import AppConfig
 
 module = Blueprint("Batches", __name__, url_prefix="/batches")
 
@@ -151,10 +154,37 @@ def view(uid):
 
     batch_parsers = []
 
+    parsers_output_dir = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_BATCHES, uid)
+
     if batch.parsers_uids:
         for p in batch.parsers_uids:
             execute(ParserModel.load(p), batch=batch)
-            batch_parsers.append(ParserModel.load(p))
+
+            parser_output = {}
+
+            parser_txt = os.path.join(parsers_output_dir, "%s.txt" % p)
+
+            if os.path.exists(parser_txt):
+                with open(parser_txt, "r") as txt:
+                    parser_output["text"] = txt.read()
+
+            parser_output["img"] = []
+            i = 0
+
+            while True:
+                img = "%s_img_%i.png" % (p, i)
+                parser_img = os.path.join(parsers_output_dir, img)
+
+                if os.path.exists(parser_img):
+                    parser_output["img"].append(img)
+                    i += 1
+                else:
+                    break
+
+            batch_parsers.append({
+                "parser": ParserModel.load(p),
+                "output": parser_output
+            })
 
     form.parser_uid.choices = [(a.uid, a.title) for a in ParserModel.load_all()]
 
@@ -169,6 +199,8 @@ def view(uid):
                 {"_id": ObjectId(uid)},
                 {"parsers_uids": batch.parsers_uids + [form.parser_uid.data]}
             )
+
+        return redirect(url_for("Batches.view", uid=uid))
 
     return render_template(
         "batches/batch.html",
@@ -186,14 +218,15 @@ def remove_parser(batch_uid, parser_uid):
     batch = BatchModel.load(batch_uid)
 
     if parser_uid in batch.parsers_uids:
-        new_parsers_uids = batch.parsers_uids.remove(parser_uid)
+        batch.parsers_uids.remove(parser_uid)
 
         BatchModel.update(
             {"_id": ObjectId(batch_uid)},
-            {"parsers_uids": new_parsers_uids}
+            {"parsers_uids": batch.parsers_uids}
         )
 
     return redirect(url_for("Batches.view", uid=batch_uid))
+
 
 @module.route("/<uid>/delete")
 @login_required
@@ -204,3 +237,8 @@ def delete(uid):
         Common.flash(str(e), category="danger")
 
     return redirect(url_for("Batches.index"))
+
+
+@module.route('/<batch_uid>/poutput/<img>')
+def parser_img_output(batch_uid, img):
+    return send_from_directory(os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_BATCHES, batch_uid), img, as_attachment=False)

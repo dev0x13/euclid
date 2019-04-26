@@ -13,6 +13,7 @@ from app.fcomponents.Formats.controllers import FormatModel
 from app.fcomponents.Common import ModelFactory
 from app.fcomponents.User.models import UserModel
 from app.bcomponents.parser_backend.executor import PARSER_BASE
+from app.bcomponents.parser_backend.validator import validate_parser
 
 module = Blueprint("Parsers", __name__, url_prefix="/parsers")
 
@@ -57,68 +58,6 @@ class ParserModel(ModelFactory.produce("parsers",
                     raise ValueError("Some batches use this parser")
 
         super().delete(uid)
-
-
-# This is a draft for parsers validation.
-# Note: wacked for now, will be done inside Docker container
-
-sys.path.append("/tmp/")
-
-from contextlib import contextmanager
-
-
-@contextmanager
-def parser_tmp_module(*args, **kwds):
-    tmp_module_uid = kwds["tmp_module_uid"]
-    try:
-        yield tmp_module_uid
-    finally:
-        os.remove("/tmp/%s.py" % tmp_module_uid)
-
-
-def validate_parser(code):
-    code = PARSER_BASE + code
-
-    tmp_module_uid = "tmp_%s" % uuid.uuid4().hex
-
-    with open("/tmp/%s.py" % tmp_module_uid, "w") as c:
-        c.write(code)
-
-    with parser_tmp_module(tmp_module_uid=tmp_module_uid):
-        try:
-            _module = __import__(tmp_module_uid, fromlist=["Parser", "ParserImpl"])
-            ParserImpl = _module.ParserImpl
-            Parser = _module.Parser
-        except ImportError:
-            return 1, "`ParserImpl` class is not found"
-        except Exception as e:
-            return 1, str(e)
-
-        if not issubclass(ParserImpl, Parser):
-            return 1, "`ParserImpl` class should inherit `Parser`"
-
-        p = getattr(ParserImpl, "process_sample", None)
-        if not callable(p):
-            return 1, "missing `process_sample` method"
-        else:
-            if "sample" not in inspect.getfullargspec(p)[0]:
-                return 1, "`process_sample` method missing `sample` argument"
-
-        p = getattr(ParserImpl, "process_experiment", None)
-        if not callable(p):
-            return 1, "missing `process_experiment` method"
-        else:
-            if "experiment" not in inspect.getfullargspec(p)[0]:
-                return 1, "`process_experiment` method missing `experiment` argument"
-
-        p = getattr(ParserImpl, "process_batch", None)
-        if not callable(p):
-            return 1, "missing `process_batch` method"
-        else:
-            if "batch" not in inspect.getfullargspec(p)[0]:
-                return 1, "`process_batch` method missing `batch` argument"
-
-        return 0, "All OK!"
 
 
 @module.route("/")
