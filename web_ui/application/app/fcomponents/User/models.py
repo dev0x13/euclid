@@ -35,7 +35,7 @@ class UserModel:
         self.email = ""
         self.password = ""
         # isAdmin
-        self.action_mask = int(31)
+        self.action_mask = int(63)
 
     @classmethod
     def load(cls, uid=None, username=None):

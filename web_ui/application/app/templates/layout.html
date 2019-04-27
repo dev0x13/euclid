@@ -59,7 +59,7 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                                aria-expanded="false">Admin <span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a href='#'>Users</a></li>
+                                <li><a href='{{ url_for("Admin.users_table") }}'>Users</a></li>
                                 <li><a href='{{ url_for("Admin.apps") }}'>Apps</a></li>
                             </ul>
                         </li>

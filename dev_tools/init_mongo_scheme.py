@@ -10,7 +10,7 @@ db_port = 27017
 default_username = "test"
 default_password = "test"
 # isAdmin
-default_actions = int(31)
+default_actions = int(63)
 
 ##########
 
