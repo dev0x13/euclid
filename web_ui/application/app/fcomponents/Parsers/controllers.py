@@ -49,13 +49,17 @@ class ParserModel(ModelFactory.produce("parsers",
     @classmethod
     def delete(cls, uid):
         from app.fcomponents.Batches.controllers import BatchModel
+        from app.fcomponents.Experiments.controllers import ExpModel
 
-        batches = BatchModel.load_all()
-
-        for b in batches:
+        for b in BatchModel.load_all():
             if b.parsers_uids:
                 if uid in b.parsers_uids:
                     raise ValueError("Some batches use this parser")
+
+        for e in ExpModel.load_all():
+            if e.parsers_uids:
+                if uid in e.parsers_uids:
+                    raise ValueError("Some experiments use this parser")
 
         super().delete(uid)
 

@@ -65,6 +65,7 @@ def execute(parser, batch=None, experiment=None, sample=None):
         if batch:
             data = {
                 "meta": batch.meta,
+                "uid": batch.uid,
                 "experiments": []
             }
 
@@ -80,13 +81,14 @@ def execute(parser, batch=None, experiment=None, sample=None):
         elif experiment:
             data = {
                 "meta": experiment.meta,
-                "samples": [{"file": s.file} for s in SampleModel.load_all_by_experiment(experiment.uid)]
+                "uid": experiment.uid,
+                "samples": [{"file": s.file, "uid": s.uid} for s in SampleModel.load_all_by_experiment(experiment.uid)]
             }
 
             with open(os.path.join(tmp_workspace_path, "experiment.pkl"), "wb") as f:
                 pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
         elif sample:
-            data = {"file": sample.file}
+            data = {"file": sample.file, "uid": sample.uid}
 
             with open(os.path.join(tmp_workspace_path, "sample.pkl"), "wb") as f:
                 pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
@@ -147,7 +149,6 @@ def execute(parser, batch=None, experiment=None, sample=None):
         try:
             docker_client.containers.run("euclid_parser_env", "python executor.py", volumes=docker_volumes)
         except ContainerError as e:
-            print(e)
             return 1, e
 
         return 0, ""

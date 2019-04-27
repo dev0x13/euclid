@@ -158,31 +158,36 @@ def view(uid):
 
     if batch.parsers_uids:
         for p in batch.parsers_uids:
-            execute(ParserModel.load(p), batch=batch)
-
+            parser = ParserModel.load(p)
             parser_output = {}
 
-            parser_txt = os.path.join(parsers_output_dir, "%s.txt" % p)
+            if batch.locked:
+                error_code, msg = execute(parser, batch=batch)
 
-            if os.path.exists(parser_txt):
-                with open(parser_txt, "r") as txt:
-                    parser_output["text"] = txt.read()
+                if error_code != 0:
+                    Common.flash("Parser `%s` error: %s" % (parser.title, msg))
 
-            parser_output["img"] = []
-            i = 0
+                parser_txt = os.path.join(parsers_output_dir, "%s.txt" % p)
 
-            while True:
-                img = "%s_img_%i.png" % (p, i)
-                parser_img = os.path.join(parsers_output_dir, img)
+                if os.path.exists(parser_txt):
+                    with open(parser_txt, "r") as txt:
+                        parser_output["text"] = txt.read()
 
-                if os.path.exists(parser_img):
-                    parser_output["img"].append(img)
-                    i += 1
-                else:
-                    break
+                parser_output["img"] = []
+                i = 0
+
+                while True:
+                    img = "%s_img_%i.png" % (p, i)
+                    parser_img = os.path.join(parsers_output_dir, img)
+
+                    if os.path.exists(parser_img):
+                        parser_output["img"].append(img)
+                        i += 1
+                    else:
+                        break
 
             batch_parsers.append({
-                "parser": ParserModel.load(p),
+                "parser": parser,
                 "output": parser_output
             })
 

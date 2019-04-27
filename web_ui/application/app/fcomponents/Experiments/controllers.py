@@ -28,6 +28,9 @@ class ExpForm(FlaskForm):
     batch_uid = SelectField("Batch: ", default="0", coerce=str)
     format_uid = SelectField("Format: ", default="0", coerce=str)
 
+class AttachParserForm(FlaskForm):
+    parser_uid = SelectField("Parser: ", default=None, validators=[validators.DataRequired()])
+
 
 class SampleModel(Common.ModelFactory.produce("samples",
                                       [
@@ -51,6 +54,7 @@ class ExpModel(Common.ModelFactory.produce("experiments",
                                           "creator_uid",
                                           "meta",
                                           "format_uid",
+                                          "parsers_uids",
                                           "batch_uid"
                                           "locked",
                                           "num_samples"
@@ -202,39 +206,60 @@ def view(uid):
 
     filepath = os.path.join(AppConfig.UPLOAD_FOLDER, uid)
 
-    batch = BatchModel.load(experiment.batch_uid)
-
     parsers_output_dir = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, uid)
+
+    form = AttachParserForm()
+
+    form.parser_uid.choices = [(a.uid, a.title) for a in ParserModel.load_all()]
+
+    if form.validate_on_submit():
+        if not experiment.parsers_uids:
+            experiment.parsers_uids = []
+
+        new_parser_uid = form.parser_uid.data
+
+        if new_parser_uid not in experiment.parsers_uids:
+            ExpModel.update(
+                {"_id": ObjectId(uid)},
+                {"parsers_uids": experiment.parsers_uids + [form.parser_uid.data]}
+            )
+
+        return redirect(url_for("Experiments.view", uid=uid))
 
     experiment_parsers = []
 
-    if batch.parsers_uids:
-        for p in batch.parsers_uids:
-            execute(ParserModel.load(p), experiment=experiment)
-
+    if experiment.parsers_uids:
+        for p in experiment.parsers_uids:
+            parser = ParserModel.load(p)
             parser_output = {}
 
-            parser_txt = os.path.join(parsers_output_dir, "%s.txt" % p)
+            if experiment.locked:
+                error_code, msg = execute(parser, experiment=experiment)
 
-            if os.path.exists(parser_txt):
-                with open(parser_txt, "r") as txt:
-                    parser_output["text"] = txt.read()
+                if error_code != 0:
+                    Common.flash("Parser `%s` error: %s" % (parser.title, msg))
 
-            parser_output["img"] = []
-            i = 0
+                parser_txt = os.path.join(parsers_output_dir, "%s.txt" % p)
 
-            while True:
-                img = "%s_img_%i.png" % (p, i)
-                parser_img = os.path.join(parsers_output_dir, img)
+                if os.path.exists(parser_txt):
+                    with open(parser_txt, "r") as txt:
+                        parser_output["text"] = txt.read()
 
-                if os.path.exists(parser_img):
-                    parser_output["img"].append(img)
-                    i += 1
-                else:
-                    break
+                parser_output["img"] = []
+                i = 0
+
+                while True:
+                    img = "%s_img_%i.png" % (p, i)
+                    parser_img = os.path.join(parsers_output_dir, img)
+
+                    if os.path.exists(parser_img):
+                        parser_output["img"].append(img)
+                        i += 1
+                    else:
+                        break
 
             experiment_parsers.append({
-                "parser": ParserModel.load(p),
+                "parser": parser,
                 "output": parser_output
             })
 
@@ -264,6 +289,7 @@ def view(uid):
         experiment=experiment,
         experiment_parsers=experiment_parsers,
         samples=samples,
+        form=form,
         title="Experiment"
     )
 
@@ -287,6 +313,19 @@ def delete(uid):
     return redirect(url_for("Experiments.index"))
 
 
+@module.route("/samples/<sample_uid>")
+@login_required
+def view_samples(sample_uid):
+    sample = SampleModel.load(sample_uid)
+
+    if not sample:
+        abort(404)
+
+    # TODO: implement
+
+    return redirect(url_for("Experiments.index"))
+
+
 @module.route("/download_sample/<sample_uid>")
 @login_required
 def download_sample(sample_uid):
@@ -299,6 +338,22 @@ def download_sample(sample_uid):
         os.path.join(AppConfig.UPLOAD_FOLDER,
                      sample.experiment_uid),
         sample.file, as_attachment=True)
+
+
+@module.route("/<experiment_uid>/remove_parser/<parser_uid>", methods=Common.http_methods)
+@login_required
+def remove_parser(experiment_uid, parser_uid):
+    exp = ExpModel.load(experiment_uid)
+
+    if parser_uid in exp.parsers_uids:
+        exp.parsers_uids.remove(parser_uid)
+
+        ExpModel.update(
+            {"_id": ObjectId(experiment_uid)},
+            {"parsers_uids": exp.parsers_uids}
+        )
+
+    return redirect(url_for("Experiments.view", uid=experiment_uid))
 
 
 @module.route('/<exp_uid>/poutput/<img>')

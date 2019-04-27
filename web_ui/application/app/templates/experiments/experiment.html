@@ -25,6 +25,9 @@
                     {% else %}
                         <button type='button' class='btn btn-default'
                                 title='Export'>{{ utils.icon('download-alt') }}</button>
+                        <a class="btn btn-primary" data-toggle="modal" data-target="#parsers_modal" role="button" title="Attach parser">
+                            {{ utils.icon('console') }}
+                        </a>
                     {% endif %}
                 </div>
             </div>
@@ -79,11 +82,16 @@
                     <tr>
                         <td>{{ s.file }}</td>
                         <td>{{ s.creator_name }}</td>
-                        <td><a class="btn btn-default"
+                        <td><div class="pull-right">
+                            <a class="btn btn-default btn-sm" href="{{ url_for("Experiments.view_samples", sample_uid=s.uid) }}"
+                               role="button">{{ utils.icon('eye-open') }}</a>
+                            <a class="btn btn-default btn-sm"
                                href="{{ url_for("Experiments.download_sample", sample_uid=s.uid) }}" role="button">
                             {{ utils.icon('download-alt') }}
-                        </a></td>
-                    </tr>
+                            </a>
+                            </div>
+                        </td>
+                    </td>
                 {% endfor %}
                 </tbody>
             </table>
@@ -91,18 +99,60 @@
         <div class='col-xs-4'>
             <h3>Parsers</h3>
             <hr>
+            <h4>Attached parsers</h4>
+            {% if experiment_parsers|length > 0 %}
+                {% for p in experiment_parsers %}
+                    <div class="panel panel-default">
+                        <div class="panel-body" style="padding: 0px">
+                            <a class="btn btn-sm" href="{{ url_for("Parsers.view", uid=p["parser"].uid) }}"
+                                   role="button">{{ p["parser"].title }}</a>
+                            <div class="pull-right">
+                                {{
+                                   macros.render_button_with_confirm(
+                                       utils.icon('remove'),
+                                       'btn btn-sm',
+                                       url_for("Experiments.remove_parser", experiment_uid=experiment.uid, parser_uid=p["parser"].uid))
+                                }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <i>None</i>
+            {% endif %}
+            <hr>
             <h4>Output</h4>
-            {% for p in experiment_parsers %}
-                <div class="jumbotron" style="padding: 10px;">
-                    <b>{{ p["parser"].title }}</b>
-                    <hr>
-                    {{ p["output"]["text"] }}
-                    {% for i in p["output"]["img"] %}
-                        <img width="100%"
-                             src="{{ url_for("Experiments.parser_img_output", img=i, exp_uid=experiment.uid) }}"/>
-                    {% endfor %}
+            {% if experiment_parsers|length > 0 %}
+                {% for p in experiment_parsers %}
+                    <div class="jumbotron" style="padding: 10px;">
+                        <b>{{ p["parser"].title }}</b>
+                        <hr>
+                        {{ p["output"]["text"] }}
+                        {% for i in p["output"]["img"] %}
+                            <img width="100%"
+                                 src="{{ url_for("Experiments.parser_img_output", img=i, exp_uid=experiment.uid) }}"/>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <i>None</i>
+            {% endif %}
+        </div>
+    </div>
+    <div class='modal fade' id='parsers_modal' tabindex='-1' role='dialog' aria-labelledby='parsers_modal_lanel'
+         aria-hidden='true'>
+        <div class='modal-dialog'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>
+                    <h4 class='modal-title' id='handbook_modal_label'>Attach parser</h4>
                 </div>
-            {% endfor %}
+                <div class='modal-body'>
+                    {% call macros.render_form(form, action_text="Attach") %}
+                        {{ macros.render_field(form.parser_uid) }}
+                    {% endcall %}
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}
