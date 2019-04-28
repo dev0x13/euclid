@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from app import db
 from bson.objectid import ObjectId
 
+from app.fcomponents.Common import ModelFactory
 
-class UserModel:
 
+class UserModel(ModelFactory.produce("users", ["username", "email", "password", "action_mask"])):
     # returns bit mask shift
     action_shift = {
-        'isAdmin': 0,
-        'manageParsers': 1,
-        'manageExprData': 2,
-        'viewExprData': 3,
-        'createFormats': 4,
-        'generateReports': 5
+        'is_admin': 0,
+        'manage_parsers': 1,
+        'manage_exp_data': 2,
+        'view_exp_data': 3,
+        'manage_formats': 4,
+        'generate_reports': 5
     }
 
     def is_authenticated(self):
@@ -28,31 +28,29 @@ class UserModel:
     def get_id(self):
         return self.uid
 
-    def __init__(self):
-        super().__init__()
-        self.uid = ""
-        self.username = ""
-        self.email = ""
-        self.password = ""
-        # isAdmin
-        self.action_mask = int(63)
+    def save(self):
+        if not self.action_mask:
+            self.action_mask = int(63)
+
+        if self.username == "" or self.password == "":
+            raise ValueError("Invalid username or password")
+
+        test = UserModel.load(username=self.username)
+
+        if test:
+            if test.uid != self.uid:
+                raise ValueError("Non unique username")
+
+        # TODO: implement action mask validation
+
+        super().save()
 
     @classmethod
     def load(cls, uid=None, username=None):
         if uid is not None:
-            user_rec = db.users.find_one({"_id": ObjectId(uid)})
+            user = cls.find_one({"_id": ObjectId(uid)})
         elif username is not None:
-            user_rec = db.users.find_one({"username": username})
-        else:
-            return None
-
-        user = UserModel()
-
-        if user_rec:
-            user.username = user_rec["username"]
-            user.password = user_rec["password"]
-            user.action_mask = user_rec["action_mask"]
-            user.uid = str(user_rec["_id"])
+            user = cls.find_one({"username": username})
         else:
             return None
 
@@ -60,9 +58,9 @@ class UserModel:
 
     @classmethod
     def get_name(cls, uid):
-        rec = db.users.find_one({"_id": ObjectId(uid)})
+        rec = cls.load(uid=uid)
 
-        return rec["username"] if rec else None
+        return rec.username if rec else None
 
     def check_access(self, action):
         if action in self.action_shift:  # TODO remove this "if", when actions are synchronized

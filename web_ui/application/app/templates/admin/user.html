@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+
+{% block page_content %}
+    {% call macros.render_form(form, action_text="Save") %}
+        {{ form.hidden_tag() }}
+        {{ macros.render_field(form.username, label_visible=False) }}
+        {{ macros.render_field(form.email, label_visible=False) }}
+        {{ macros.render_field(form.password, label_visible=False) }}
+        {{ macros.render_field(form.repeat_password, label_visible=False) }}
+        <p>Actions</p>
+        <hr>
+        {{ macros.render_field(form.is_admin, class_='', abel_visible=True) }}
+        {{ macros.render_field(form.manage_parsers, class_='', label_visible=True) }}
+        {{ macros.render_field(form.manage_exp_data, class_='', label_visible=True) }}
+        {{ macros.render_field(form.view_exp_data, class_='', label_visible=True) }}
+        {{ macros.render_field(form.manage_formats, class_='', label_visible=True) }}
+        {{ macros.render_field(form.generate_reports, class_='', label_visible=True) }}
+    {% endcall %}
+{% endblock %}

@@ -1,16 +1,15 @@
 import uuid
 
-from flask import Blueprint, render_template, redirect, url_for
+from bson import ObjectId
+from flask import Blueprint, render_template, redirect, url_for, abort
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField, validators
+from wtforms import StringField, BooleanField, validators, PasswordField
 from app.fcomponents import Common
 from app.fcomponents.Common import ModelFactory
 from app.fcomponents.User.models import UserModel
-from app import db
 
 from werkzeug.security import generate_password_hash
-from bson import ObjectId
 
 module = Blueprint("Admin", __name__, url_prefix="/admin")
 
@@ -32,25 +31,30 @@ class AppModel(ModelFactory.produce("apps", ["key", "title", "creator_id"])):
         return inst
 
 
-class FormatFormApp(FlaskForm):
+class AppForm(FlaskForm):
     title = StringField([validators.DataRequired()], render_kw={"placeholder": "Title"})
 
 
-class FormatFormUser(FlaskForm):
-    title = StringField([validators.DataRequired()], render_kw={"placeholder": "Title"})
-    password = StringField([validators.DataRequired()], render_kw={"placeholder": "Password"})
-    isAdmin = BooleanField('Is admin')
-    manageParsers = BooleanField('Can manage parsers')
-    manageExprData = BooleanField('Can manage experiment data')
-    viewExprData = BooleanField('Can view experiment data')
-    createFormats = BooleanField('Can create formats')
-    generateReports = BooleanField('Can generate reports')
+class UserForm(FlaskForm):
+    username = StringField([validators.DataRequired()], render_kw={"placeholder": "Username"})
+    email = StringField([validators.DataRequired()], render_kw={"placeholder": "Email"})
+    password = PasswordField(render_kw={"placeholder": "Password"})
+    repeat_password = PasswordField(render_kw={"placeholder": "Repeat password"})
+
+    # Actions
+
+    is_admin = BooleanField('Is admin')
+    manage_parsers = BooleanField('Can manage parsers')
+    manage_exp_data = BooleanField('Can manage experiment data')
+    view_exp_data = BooleanField('Can view experiment data')
+    manage_formats = BooleanField('Can create formats')
+    generate_reports = BooleanField('Can generate reports')
 
 
 @module.route("/apps", methods=Common.http_methods)
 @login_required
 def apps():
-    form = FormatFormApp()
+    form = AppForm()
 
     apps_ = AppModel.load_all()
 
@@ -67,7 +71,7 @@ def apps():
         else:
             return redirect(url_for("Admin.apps"))
 
-    return render_template("apps.html", apps=apps_, form=form, title="External apps")
+    return render_template("admin/apps.html", apps=apps_, form=form, title="External apps")
 
 
 @module.route("/apps/delete/<uid>")
@@ -77,49 +81,89 @@ def delete_app(uid):
     return redirect(url_for("Admin.apps"))
 
 
-@module.route("/usersTable", methods=Common.http_methods)
-def users_table():
-    users = db.users.find()
+@module.route("/users")
+def users():
+    users_ = UserModel.load_all()
 
-    create_form = FormatFormUser()
-    set_form = FormatFormUser()
+    return render_template("admin/users.html", users=users_, title="Users")
 
-    if create_form.validate_on_submit():
-        mask = 0
+
+@module.route("/create_user", defaults={"uid": None}, methods=Common.http_methods)
+@module.route("/users/<uid>/edit", methods=Common.http_methods)
+def user(uid):
+    form = UserForm()
+
+    if uid:
+        user_ = UserModel.load(uid)
+
+        if not user_:
+            abort(404)
+
+        form.username.default = user_.username
+        form.email.default = user_.email
+
         for action in UserModel.action_shift:
-            if create_form[action].data:
+            if user_.check_access(action):
+                form[action].default = True
+
+    else:
+        user_ = UserModel()
+
+    if form.validate_on_submit():
+        mask = 0
+
+        for action in UserModel.action_shift:
+            if form[action].data:
                 mask += 2 ** UserModel.action_shift[action]
 
         try:
-            db.users.insert_one({"username": create_form.title.data,
-                                 "password": generate_password_hash(create_form.password.data),
-                                 "action_mask": mask})
+            username = form.username.data
+
+            password = None
+
+            if form.password.data:
+                if form.password.data != form.repeat_password.data:
+                    raise ValueError("Passwords doesn't match")
+
+                password = generate_password_hash(form.password.data)
+            else:
+                if not uid:
+                    raise ValueError("Password cannot be empty")
+
+            action_mask = mask
+            email = form.email.data
+
+            if uid:
+                d = {
+                    "email": email,
+                    "username": username,
+                    "action_mask": action_mask
+                }
+
+                if password:
+                    d["password"] = password
+
+                UserModel.update(cond={"_id": ObjectId(uid)}, upd=d)
+            else:
+                user_.email = email
+                user_.username = username
+                user_.password = password
+                user_.action_mask = action_mask
+
+                user_.save()
         except ValueError as e:
             Common.flash(e, category="danger")
         else:
-            return redirect(url_for("Admin.users_table"))
+            return redirect(url_for("Admin.users"))
 
-    if set_form.validate_on_submit():
-        mask = 0
-        for action in UserModel.action_shift:
-            if set_form[action].data:
-                mask += 2 ** UserModel.action_shift[action]
+    form.process()
 
-        try:
-            db.users.update_one({'_id': ObjectId(current_user.uid)}, {'$set': {"action_mask": mask}}, upsert=False)
-        except ValueError as e:
-            Common.flash(e, category="danger")
-        else:
-            return redirect(url_for("Admin.users_table"))
-
-    return render_template("users.html", users=users, create_form=create_form, set_form=set_form, title="Users table")
+    return render_template("admin/user.html", form=form, user=user, title="User")
 
 
-@module.route("/usersTable/delete/<uid>")
+@module.route("/users/<uid>/delete")
 def delete_user(uid):
-    try:
-        db.users.delete_one({"_id": ObjectId(uid)})
-    except ValueError as e:
-        Common.flash(e, category="danger")
+    if uid != current_user.uid:
+        UserModel.delete(uid)
 
-    return redirect(url_for("Admin.users_table"))
+    return redirect(url_for("Admin.users"))

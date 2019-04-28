@@ -30,17 +30,14 @@ class FormatModel(ModelFactory.produce("formats", ["json_data", "title"])):
     @classmethod
     def delete(cls, uid):
         from app.fcomponents.Batches.controllers import BatchModel
+        from app.fcomponents.Experiments.controllers import ExpModel
 
         batch = BatchModel.find_one({"format_uid": uid})
         if batch:
             raise ValueError("The format is used by following batch: <b>%s</b>" % batch.title)
 
-        # TODO: Here come the same logic for experiments and samples:
-        # if BatchModel.find_one({"format_uid": uid}):
-        #    raise ValueError("This format is used by some experiments")
-        #
-        # if BatchModel.find_one({"format_uid": uid}):
-        #    raise ValueError("This format is used by some samples")
+        if ExpModel.find_one({"format_uid": uid}):
+            raise ValueError("The format is used by some experiments")
 
         super().save()
 
@@ -50,7 +47,7 @@ class FormatModel(ModelFactory.produce("formats", ["json_data", "title"])):
 def index():
     formats = FormatModel.load_all()
 
-    return render_template("formats.html", formats=formats, title="Formats")
+    return render_template("formats/formats.html", formats=formats, title="Formats")
 
 
 @module.route("/create", methods=Common.http_methods)
@@ -77,7 +74,7 @@ def create():
             else:
                 return redirect(url_for("Formats.index"))
 
-    return render_template("create_format.html", form=form, title="Add format")
+    return render_template("formats/create_format.html", form=form, title="Add format")
 
 
 @module.route("/delete/<uid>", methods=Common.http_methods)

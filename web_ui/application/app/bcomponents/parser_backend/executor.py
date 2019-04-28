@@ -54,6 +54,9 @@ def parser_tmp_workspace(*args, **kwds):
 def execute(parser, batch=None, experiment=None, sample=None):
     from app.fcomponents.Experiments.controllers import ExpModel, SampleModel
 
+    if not AppConfig.PARSERS_ENGINE_ENABLED:
+        return 1, "Parsers engine disabled by config"
+
     with parser_tmp_workspace() as tmp_workspace_path:
         open(os.path.join(tmp_workspace_path, "__init__.py"), 'a').close()
 
@@ -109,7 +112,7 @@ def execute(parser, batch=None, experiment=None, sample=None):
                 return 0, ""
 
             for exp in ExpModel.load_all_by_batch(batch.uid):
-                docker_volumes[os.path.join(AppConfig.UPLOAD_FOLDER, exp.uid)] = {
+                docker_volumes[os.path.join(AppConfig.EXP_DATA_FOLDER, exp.uid)] = {
                     "bind": "/env/input/%s" % exp.uid,
                     "mode": "ro"
                 }
@@ -123,7 +126,7 @@ def execute(parser, batch=None, experiment=None, sample=None):
             if os.path.exists(output_path):
                 return 0, ""
 
-            docker_volumes[os.path.join(AppConfig.UPLOAD_FOLDER, experiment.uid)] = {
+            docker_volumes[os.path.join(AppConfig.EXP_DATA_FOLDER, experiment.uid)] = {
                 "bind": "/env/input/%s" % experiment.uid,
                 "mode": "ro"
             }
@@ -137,7 +140,7 @@ def execute(parser, batch=None, experiment=None, sample=None):
             if os.path.exists(output_path):
                 return 0, ""
 
-            docker_volumes[os.path.join(AppConfig.UPLOAD_FOLDER, sample.experiment_uid, sample.file)] = {
+            docker_volumes[os.path.join(AppConfig.EXP_DATA_FOLDER, sample.experiment_uid, sample.file)] = {
                 "bind": "/env/input/%s/%s" % (sample.experiment_uid, sample.file),
                 "mode": "ro"
             }

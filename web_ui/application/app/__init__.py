@@ -7,6 +7,7 @@ from flask_bootstrap import Bootstrap
 from pymongo import MongoClient
 from app.config import AppConfig
 
+
 client = MongoClient(AppConfig.DB_HOST, AppConfig.DB_PORT)
 db = client.euclid
 
@@ -29,7 +30,6 @@ def create_app():
     import app.fcomponents.Admin.controllers as AdminModule
     import app.fcomponents.Batches.controllers as BatchesModule
     import app.fcomponents.Experiments.controllers as ExperimentsModule
-    import app.fcomponents.Samples.controllers as SamplesModule
     import app.fcomponents.Parsers.controllers as ParsersModule
     import app.fcomponents.Tools.controllers as ToolsModule
     import app.fcomponents.User.controllers as UsersModule
@@ -38,17 +38,22 @@ def create_app():
     app.register_blueprint(AdminModule.module)
     app.register_blueprint(BatchesModule.module)
     app.register_blueprint(ExperimentsModule.module)
-    app.register_blueprint(SamplesModule.module)
     app.register_blueprint(ParsersModule.module)
     app.register_blueprint(ToolsModule.module)
     app.register_blueprint(UsersModule.module)
     app.register_blueprint(FormatsModule.module)
 
+    if not os.path.exists(AppConfig.DATA_ROOT_FOLDER):
+        os.mkdir(AppConfig.DATA_ROOT_FOLDER)
+
+    if not os.path.exists(AppConfig.EXP_DATA_FOLDER):
+        os.mkdir(AppConfig.EXP_DATA_FOLDER)
+
     if not os.path.exists(AppConfig.PARSERS_WORKSPACES_FOLDER):
         os.mkdir(AppConfig.PARSERS_WORKSPACES_FOLDER)
 
-    if not os.path.exists(AppConfig.PARSERS_OUTPUT_ROOT):
-        os.mkdir(AppConfig.PARSERS_OUTPUT_ROOT)
+    if not os.path.exists(AppConfig.PARSERS_OUTPUT_ROOT_FOLDER):
+        os.mkdir(AppConfig.PARSERS_OUTPUT_ROOT_FOLDER)
 
     @app.before_request
     def check_valid_login():

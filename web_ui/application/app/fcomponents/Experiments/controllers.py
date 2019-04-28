@@ -116,7 +116,7 @@ class ExpModel(Common.ModelFactory.produce("experiments",
             if exp.locked:
                 raise ValueError("Experiment is locked")
 
-            data_path = os.path.join(AppConfig.UPLOAD_FOLDER, uid)
+            data_path = os.path.join(AppConfig.EXP_DATA_FOLDER, uid)
             if os.path.exists(data_path):
                 shutil.rmtree(data_path)
 
@@ -204,7 +204,7 @@ def view(uid):
 
     samples = SampleModel.load_all_by_experiment(uid)
 
-    filepath = os.path.join(AppConfig.UPLOAD_FOLDER, uid)
+    filepath = os.path.join(AppConfig.EXP_DATA_FOLDER, uid)
 
     parsers_output_dir = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, uid)
 
@@ -335,7 +335,7 @@ def download_sample(sample_uid):
         abort(404)
 
     return send_from_directory(
-        os.path.join(AppConfig.UPLOAD_FOLDER,
+        os.path.join(AppConfig.EXP_DATA_FOLDER,
                      sample.experiment_uid),
         sample.file, as_attachment=True)
 
