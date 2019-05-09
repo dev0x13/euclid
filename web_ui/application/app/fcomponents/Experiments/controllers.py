@@ -1,10 +1,12 @@
 import os
+import zipfile
 from datetime import datetime
 import json
 import time
+from io import BytesIO
 
 from bson import ObjectId
-from flask import Blueprint, redirect, url_for, render_template, request, abort, send_from_directory
+from flask import Blueprint, redirect, url_for, render_template, request, abort, send_from_directory, send_file
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from werkzeug.utils import secure_filename
@@ -28,6 +30,7 @@ class ExpForm(FlaskForm):
     batch_uid = SelectField("Batch: ", default="0", coerce=str)
     format_uid = SelectField("Format: ", default="0", coerce=str)
 
+
 class AttachParserForm(FlaskForm):
     parser_uid = SelectField("Parser: ", default=None, validators=[validators.DataRequired()])
 
@@ -46,6 +49,25 @@ class SampleModel(Common.ModelFactory.produce("samples",
             setattr(i, "creator_name", UserModel.get_name(i.creator_uid))
 
         return inst
+
+    @classmethod
+    def export(cls, uid, with_experiment=True):
+        i = cls.load(uid)
+
+        if not i:
+            return None
+
+        i = i.to_dict()
+
+        i["creator_name"] = UserModel.get_name(i["creator_uid"])
+        i["uid"] = uid
+
+        if with_experiment:
+            i["experiment_meta"] = ExpModel.export(i["experiment_uid"])
+
+        del i["_id"]
+
+        return i
 
 
 class ExpModel(Common.ModelFactory.produce("experiments",
@@ -122,6 +144,38 @@ class ExpModel(Common.ModelFactory.produce("experiments",
 
             super().delete(uid)
 
+    @classmethod
+    def export(cls, uid, with_batch=True):
+        i = cls.load(uid)
+
+        if not i:
+            return None
+
+        i = i.to_dict()
+
+        i["creator_name"] = UserModel.get_name(i["creator_uid"])
+        i["uid"] = uid
+
+        if i["batch_uid"] != "0" and with_batch:
+            i["batch_meta"] = BatchModel.export(i["batch_uid"])
+
+        i["timestamp"] = time.mktime(i["timestamp"].timetuple())
+        i["format"] = FormatModel.export(i["format_uid"])
+        i["meta"] = json.loads(i["meta"])
+
+        samples = SampleModel.load_all_by_experiment(uid)
+
+        i["samples"] = []
+        for s in samples:
+            i["samples"].append(SampleModel.export(s.uid, with_experiment=False))
+
+        if "parsers_uids" in i:
+            del i["parsers_uids"]
+
+        del i["_id"]
+
+        return i
+
 
 @module.route("/")
 @login_required
@@ -192,39 +246,13 @@ def create():
     )
 
 
-@module.route("/<uid>", methods=Common.http_methods)
-@login_required
-def view(uid):
+def _process_exp_parsers(experiment, sample=None):
     from app.fcomponents.Parsers.controllers import ParserModel
 
-    experiment = ExpModel.load(uid)
-
-    if not experiment:
-        abort(404)
-
-    samples = SampleModel.load_all_by_experiment(uid)
-
-    filepath = os.path.join(AppConfig.EXP_DATA_FOLDER, uid)
-
-    parsers_output_dir = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, uid)
-
-    form = AttachParserForm()
-
-    form.parser_uid.choices = [(a.uid, a.title) for a in ParserModel.load_all()]
-
-    if form.validate_on_submit():
-        if not experiment.parsers_uids:
-            experiment.parsers_uids = []
-
-        new_parser_uid = form.parser_uid.data
-
-        if new_parser_uid not in experiment.parsers_uids:
-            ExpModel.update(
-                {"_id": ObjectId(uid)},
-                {"parsers_uids": experiment.parsers_uids + [form.parser_uid.data]}
-            )
-
-        return redirect(url_for("Experiments.view", uid=uid))
+    if not sample:
+        parsers_output_dir = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, experiment.uid)
+    else:
+        parsers_output_dir = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_SAMPLES, sample.uid)
 
     experiment_parsers = []
 
@@ -234,7 +262,10 @@ def view(uid):
             parser_output = {}
 
             if experiment.locked:
-                error_code, msg = execute(parser, experiment=experiment)
+                if sample:
+                    error_code, msg = execute(parser, sample=sample)
+                else:
+                    error_code, msg = execute(parser, experiment=experiment)
 
                 if error_code != 0:
                     Common.flash("Parser `%s` error: %s" % (parser.title, msg))
@@ -262,6 +293,43 @@ def view(uid):
                 "parser": parser,
                 "output": parser_output
             })
+
+    return experiment_parsers
+
+
+@module.route("/<uid>", methods=Common.http_methods)
+@login_required
+def view(uid):
+    from app.fcomponents.Parsers.controllers import ParserModel
+
+    experiment = ExpModel.load(uid)
+
+    if not experiment:
+        abort(404)
+
+    samples = SampleModel.load_all_by_experiment(uid)
+
+    filepath = os.path.join(AppConfig.EXP_DATA_FOLDER, uid)
+
+    form = AttachParserForm()
+
+    form.parser_uid.choices = [(a.uid, a.title) for a in ParserModel.load_all()]
+
+    experiment_parsers = _process_exp_parsers(experiment)
+
+    if form.validate_on_submit():
+        if not experiment.parsers_uids:
+            experiment.parsers_uids = []
+
+        new_parser_uid = form.parser_uid.data
+
+        if new_parser_uid not in experiment.parsers_uids:
+            ExpModel.update(
+                {"_id": ObjectId(uid)},
+                {"parsers_uids": experiment.parsers_uids + [form.parser_uid.data]}
+            )
+
+        return redirect(url_for("Experiments.view", uid=uid))
 
     if "samples[]" in request.files:
         files = request.files.getlist('samples[]', None)
@@ -315,29 +383,23 @@ def delete(uid):
 
 @module.route("/samples/<sample_uid>")
 @login_required
-def view_samples(sample_uid):
+def view_sample(sample_uid):
     sample = SampleModel.load(sample_uid)
 
     if not sample:
         abort(404)
 
-    # TODO: implement
+    experiment = ExpModel.load(sample.experiment_uid)
 
-    return redirect(url_for("Experiments.index"))
+    experiment_parsers = _process_exp_parsers(experiment, sample=sample)
 
-
-@module.route("/download_sample/<sample_uid>")
-@login_required
-def download_sample(sample_uid):
-    sample = SampleModel.load(sample_uid)
-
-    if not sample:
-        abort(404)
-
-    return send_from_directory(
-        os.path.join(AppConfig.EXP_DATA_FOLDER,
-                     sample.experiment_uid),
-        sample.file, as_attachment=True)
+    return render_template(
+        "experiments/sample.html",
+        experiment=experiment,
+        experiment_parsers=experiment_parsers,
+        sample=sample,
+        title="Sample"
+    )
 
 
 @module.route("/<experiment_uid>/remove_parser/<parser_uid>", methods=Common.http_methods)
@@ -356,6 +418,59 @@ def remove_parser(experiment_uid, parser_uid):
     return redirect(url_for("Experiments.view", uid=experiment_uid))
 
 
-@module.route('/<exp_uid>/poutput/<img>')
-def parser_img_output(exp_uid, img):
-    return send_from_directory(os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, exp_uid), img, as_attachment=False)
+@module.route('/samples/<sample_uid>/poutput/<img>', defaults={"exp_uid": None})
+@module.route('/<exp_uid>/poutput/<img>', defaults={"sample_uid": None})
+def parser_img_output(exp_uid, sample_uid, img):
+    if exp_uid:
+        return send_from_directory(os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, exp_uid), img,
+                                   as_attachment=False)
+    else:
+        return send_from_directory(os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_SAMPLES, sample_uid), img,
+                                   as_attachment=False)
+
+
+@module.route('/samples/<sample_uid>/export', defaults={"exp_uid": None})
+@module.route('/<exp_uid>/export', defaults={"sample_uid": None})
+def export(exp_uid, sample_uid):
+    archive = BytesIO()
+    meta = {}
+    data_path = ""
+    archive_name = ""
+
+    if exp_uid:
+        meta = ExpModel.export(exp_uid)
+
+        if not meta:
+            abort(404)
+
+        data_path = os.path.join(AppConfig.EXP_DATA_FOLDER, exp_uid)
+        archive_name = "experiment_%s.zip" % exp_uid
+    elif sample_uid:
+        meta = SampleModel.export(sample_uid)
+        sample = SampleModel.load(sample_uid)
+
+        if not meta:
+            abort(404)
+
+        data_path = os.path.join(AppConfig.EXP_DATA_FOLDER, sample.experiment_uid, sample.file)
+        archive_name = "sample_%s.zip" % sample_uid
+
+    with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as f:
+        # If it's an experiment, then zip the whole directory
+        if exp_uid:
+            for root, dirs, files in os.walk(data_path):
+                for file in files:
+                    f.write(os.path.join(root, file), file)
+        elif sample_uid:
+            # If it's just a sample, then zip a single file
+            f.write(data_path, sample.file)
+
+        f.writestr("meta.json", json.dumps(meta, sort_keys=True, indent=2))
+
+    archive.seek(0)
+
+    f.close()
+
+    return send_file(archive,
+                     attachment_filename=archive_name,
+                     as_attachment=True)

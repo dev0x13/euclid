@@ -23,8 +23,9 @@
                         {{ macros.render_button_with_confirm(utils.icon('lock'), 'btn btn-default', url_for("Experiments.lock", uid=experiment.uid)) }}
                         {{ macros.render_button_with_confirm(utils.icon('trash'), 'btn btn-default', url_for("Experiments.delete", uid=experiment.uid)) }}
                     {% else %}
-                        <button type='button' class='btn btn-default'
-                                title='Export'>{{ utils.icon('download-alt') }}</button>
+                        <a class="btn btn-default" href="{{ url_for("Experiments.export", exp_uid=experiment.uid) }}" role="button" title="Export">
+                            {{ utils.icon('download-alt') }}
+                        </a>
                         <a class="btn btn-primary" data-toggle="modal" data-target="#parsers_modal" role="button" title="Attach parser">
                             {{ utils.icon('console') }}
                         </a>
@@ -83,10 +84,10 @@
                         <td>{{ s.file }}</td>
                         <td>{{ s.creator_name }}</td>
                         <td><div class="pull-right">
-                            <a class="btn btn-default btn-sm" href="{{ url_for("Experiments.view_samples", sample_uid=s.uid) }}"
+                            <a class="btn btn-default btn-sm" href="{{ url_for("Experiments.view_sample", sample_uid=s.uid) }}"
                                role="button">{{ utils.icon('eye-open') }}</a>
                             <a class="btn btn-default btn-sm"
-                               href="{{ url_for("Experiments.download_sample", sample_uid=s.uid) }}" role="button">
+                               href="{{ url_for("Experiments.export", sample_uid=s.uid) }}" role="button">
                             {{ utils.icon('download-alt') }}
                             </a>
                             </div>

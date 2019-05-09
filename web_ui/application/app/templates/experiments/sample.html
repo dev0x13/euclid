@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.css">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jsonview/1.2.3/jquery.jsonview.min.js"></script>
+    <script>
+        let j = $(".json_data");
+        j.JSONView(JSON.parse(j.html()));
+    </script>
+{% endblock %}
+
+{% block page_content %}
+    <div class='row'>
+        <div class='col-xs-12'>
+            <div class='btn-toolbar' role='toolbar'>
+                <div class='btn-group' role='group'>
+                    <a class="btn btn-default btn-sm"
+                               href="{{ url_for("Experiments.export", sample_uid=sample.uid) }}" role="button">
+                            {{ utils.icon('download-alt') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class='row'>
+        <div class='col-xs-6'>
+            <h3>Info</h3>
+            <hr>
+            <p><b>UID:</b></p> {{ sample.uid }} <br><br>
+            <p><b>Creator:</b></p> {{ sample.creator_name }} <br><br>
+            <p><b>File:</b></p> {{ sample.file }} <br><br>
+            <p><b>Experiment UID:</b></p> {{ experiment.uid }} <br><br>
+            <p><b>Experiment meta:</b></p>
+            <div class="json_data">{{ experiment.meta|safe }}</div>
+            <br><br>
+        </div>
+        <div class='col-xs-6'>
+            <h3>Parsers</h3>
+            <hr>
+            <h4>Attached parsers</h4>
+            {% if experiment_parsers|length > 0 %}
+                {% for p in experiment_parsers %}
+                    <div class="panel panel-default">
+                        <div class="panel-body" style="padding: 0">
+                            <a class="btn btn-sm" href="{{ url_for("Parsers.view", uid=p["parser"].uid) }}"
+                                   role="button">{{ p["parser"].title }}</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <i>None</i>
+            {% endif %}
+            <hr>
+            <h4>Output</h4>
+            {% if experiment_parsers|length > 0 %}
+                {% for p in experiment_parsers %}
+                    <div class="jumbotron" style="padding: 10px;">
+                        <b>{{ p["parser"].title }}</b>
+                        <hr>
+                        {{ p["output"]["text"] }}
+                        {% for i in p["output"]["img"] %}
+                            <img width="100%"
+                                 src="{{ url_for("Experiments.parser_img_output", img=i, sample_uid=sample.uid) }}"/>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <i>None</i>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

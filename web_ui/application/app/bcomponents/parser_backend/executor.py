@@ -47,11 +47,10 @@ def parser_tmp_workspace(*args, **kwds):
     try:
         yield tmp_workspace_path
     finally:
-        pass
-        #shutil.rmtree(tmp_workspace_path)
+        shutil.rmtree(tmp_workspace_path)
 
 
-def execute(parser, batch=None, experiment=None, sample=None):
+def execute(parser, batch=None, experiment=None, sample=None, clear_output=False, custom_output_dir=None):
     from app.fcomponents.Experiments.controllers import ExpModel, SampleModel
 
     if not AppConfig.PARSERS_ENGINE_ENABLED:
@@ -105,6 +104,8 @@ def execute(parser, batch=None, experiment=None, sample=None):
             "mode": "ro"
         }
 
+        output_dir = ""
+
         if batch:
             output_path = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_BATCHES, batch.uid, "%s.txt" % parser.uid)
 
@@ -116,10 +117,9 @@ def execute(parser, batch=None, experiment=None, sample=None):
                     "bind": "/env/input/%s" % exp.uid,
                     "mode": "ro"
                 }
-            docker_volumes[os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_BATCHES, batch.uid)] = {
-                "bind": "/env/output",
-                "mode": "rw"
-            }
+
+            output_dir = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_BATCHES, batch.uid)
+
         elif experiment:
             output_path = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, experiment.uid, "%s.txt" % parser.uid)
 
@@ -130,10 +130,9 @@ def execute(parser, batch=None, experiment=None, sample=None):
                 "bind": "/env/input/%s" % experiment.uid,
                 "mode": "ro"
             }
-            docker_volumes[os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, experiment.uid)] = {
-                "bind": "/env/output",
-                "mode": "rw"
-            }
+
+            output_dir = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_EXPERIMENTS, experiment.uid)
+
         elif sample:
             output_path = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_SAMPLES, sample.uid, "%s.txt" % parser.uid)
 
@@ -141,17 +140,27 @@ def execute(parser, batch=None, experiment=None, sample=None):
                 return 0, ""
 
             docker_volumes[os.path.join(AppConfig.EXP_DATA_FOLDER, sample.experiment_uid, sample.file)] = {
-                "bind": "/env/input/%s/%s" % (sample.experiment_uid, sample.file),
+                "bind": "/env/input/%s" % sample.file,
                 "mode": "ro"
             }
-            docker_volumes[os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_SAMPLES, sample.uid)] = {
-                "bind": "/env/output",
-                "mode": "rw"
-            }
+
+            output_dir = os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_SAMPLES, sample.uid)
+
+        if custom_output_dir:
+            output_dir = custom_output_dir
+
+        docker_volumes[output_dir] = {
+            "bind": "/env/output",
+            "mode": "rw"
+        }
 
         try:
-            docker_client.containers.run("euclid_parser_env", "python executor.py", volumes=docker_volumes)
+            docker_client.containers.run(
+                "euclid_parser_env",
+                "python executor.py %s" % ("clear_output" if clear_output else ""),
+                volumes=docker_volumes
+            )
         except ContainerError as e:
-            return 1, e
+            return 1, str(e)
 
-        return 0, ""
+        return 0, "All OK!"

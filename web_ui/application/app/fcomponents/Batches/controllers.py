@@ -1,10 +1,12 @@
 import os
+import zipfile
 from datetime import datetime
 import json
 import time
+from io import BytesIO
 
 from bson import ObjectId
-from flask import Blueprint, redirect, url_for, render_template, request, send_from_directory
+from flask import Blueprint, redirect, url_for, render_template, request, send_from_directory, abort, send_file
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, SelectField, StringField, validators
@@ -84,6 +86,39 @@ class BatchModel(ModelFactory.produce("batches",
 
         super().delete(uid)
 
+    @classmethod
+    def export(cls, uid, with_experiments=False):
+        from app.fcomponents.Experiments.controllers import ExpModel
+
+        i = cls.load(uid)
+
+        if not i:
+            return None
+
+        i = i.to_dict()
+
+        i["creator_name"] = UserModel.get_name(i["creator_uid"])
+        i["uid"] = uid
+
+        i["timestamp"] = time.mktime(i["timestamp"].timetuple())
+        i["format"] = FormatModel.export(i["format_uid"])
+
+        if with_experiments:
+            experiments = ExpModel.load_all_by_batch(uid)
+            i["experiments"] = []
+
+            for e in experiments:
+                i["experiments"].append(ExpModel.export(e.uid, with_batch=False))
+
+        i["meta"] = json.loads(i["meta"])
+
+        if "parsers_uids" in i:
+            del i["parsers_uids"]
+
+        del i["_id"]
+
+        return i
+
 
 @module.route("/")
 @login_required
@@ -119,7 +154,7 @@ def create():
                 batch = BatchModel()
                 batch.meta = meta_json
                 batch.title = form.title.data
-                batch.creator_id = current_user.uid
+                batch.creator_uid = current_user.uid
                 batch.timestamp = time.time()
                 batch.format_uid = form.format_uid.data
                 batch.exp_format_uid = form.exp_format_uid.data
@@ -247,3 +282,36 @@ def delete(uid):
 @module.route('/<batch_uid>/poutput/<img>')
 def parser_img_output(batch_uid, img):
     return send_from_directory(os.path.join(AppConfig.PARSERS_OUTPUT_FOLDER_BATCHES, batch_uid), img, as_attachment=False)
+
+
+@module.route('/<batch_uid>/export')
+def export(batch_uid):
+    from app.fcomponents.Experiments.controllers import ExpModel
+
+    archive = BytesIO()
+
+    meta = BatchModel.export(batch_uid, with_experiments=True)
+    experiments = ExpModel.load_all_by_batch(batch_uid)
+
+    if not meta:
+        abort(404)
+
+    archive_name = "batch_%s.zip" % batch_uid
+
+    with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as f:
+        for e in experiments:
+            data_path = os.path.join(AppConfig.EXP_DATA_FOLDER, e.uid)
+
+            for root, dirs, files in os.walk(data_path):
+                for file in files:
+                    f.write(os.path.join(root, file), os.path.join(e.uid, file))
+
+        f.writestr("meta.json", json.dumps(meta, sort_keys=True, indent=2))
+
+    archive.seek(0)
+
+    f.close()
+
+    return send_file(archive,
+                     attachment_filename=archive_name,
+                     as_attachment=True)

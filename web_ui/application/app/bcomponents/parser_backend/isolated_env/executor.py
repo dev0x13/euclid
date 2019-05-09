@@ -1,5 +1,6 @@
 import pickle
 import os
+import sys
 
 from workspace.parser import ParserImpl, PARSER_UID
 
@@ -23,12 +24,13 @@ elif os.path.exists("workspace/sample.pkl"):
     with open("workspace/sample.pkl", "rb") as f:
         sample = pickle.load(f)
 
-        parser.process_experiment(sample)
+        parser.process_sample(sample)
 
-for i, img in enumerate(parser.image_buffer):
-    with open("output/%s_img_%i.%s" % (PARSER_UID, i, img["format"]), "wb") as f:
-        f.write(img["image"])
+if len(sys.argv) == 1:
+    for i, img in enumerate(parser.image_buffer):
+        with open("output/%s_img_%i.%s" % (PARSER_UID, i, img["format"]), "wb") as f:
+            f.write(img["image"])
 
-with open("output/%s.txt" % PARSER_UID, "w") as f:
-    f.write(parser.text_buffer)
+    with open("output/%s.txt" % PARSER_UID, "w") as f:
+        f.write(parser.text_buffer)
 

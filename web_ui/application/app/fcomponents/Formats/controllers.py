@@ -41,6 +41,21 @@ class FormatModel(ModelFactory.produce("formats", ["json_data", "title"])):
 
         super().save()
 
+    @classmethod
+    def export(cls, uid):
+        i = cls.load(uid)
+
+        if not i:
+            return None
+
+        i = i.to_dict()
+
+        i["uid"] = uid
+        i["json_data"] = json.loads(i["json_data"])
+
+        del i["_id"]
+
+        return i
 
 @module.route("/")
 @login_required

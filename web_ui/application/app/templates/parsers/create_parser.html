@@ -15,6 +15,47 @@
         .error {
             color: #8b211e;
         }
+
+        .loader,
+        .loader:after {
+          border-radius: 50%;
+          width: 3em;
+          height: 3em;
+        }
+        .loader {
+          font-size: 10px;
+          position: relative;
+          text-indent: -9999em;
+          border-top: 0.5em solid rgba(0, 0, 255, 0.6);
+          border-right: 0.5em solid rgba(0, 0, 255, 0.6);
+          border-bottom: 0.5em solid rgba(0, 0, 255, 0.6);
+          border-left: 0.5em solid #ffffff;
+          -webkit-transform: translateZ(0);
+          -ms-transform: translateZ(0);
+          transform: translateZ(0);
+          -webkit-animation: load8 1.1s infinite linear;
+          animation: load8 1.1s infinite linear;
+        }
+        @-webkit-keyframes load8 {
+          0% {
+            -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+          }
+          100% {
+            -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+          }
+        }
+        @keyframes load8 {
+          0% {
+            -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+          }
+          100% {
+            -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+          }
+        }
     </style>
 {% endblock %}
 
@@ -39,20 +80,88 @@
         code.val(editor.getSession().getValue());
         document.getElementById('editor').style.fontSize='16px';
 
+        let debug_input_type = $("#debug_input_type"),
+            debug_input_uid = $("#debug_input_uid"),
+            debug_output = $("#debug_output"),
+            validate_button = $("#validate_button"),
+            parser_output = $("#parser_output");
+
         function validate() {
             $.ajax({
                 type: "POST",
                 url: "/parsers/validate",
-                data: {code: editor.getSession().getValue()},
+                data: {
+                    code: editor.getSession().getValue(),
+                    debug_input_type: debug_input_type.val(),
+                    debug_input_uid: debug_input_uid.val()
+                },
                 success: function (data) {
-                    let class_ = data[0] === 1 ? "error" : "info";
-                    let text = ($("#debug_output").html() != "" ? "<br>" : "" ) +
-                               "<span class='" + class_ + "'>" +
-                               (data[0] === 1 ? "Error: " + data[1] : data[1]) + "</span>";
-                    $("#debug_output").html($("#debug_output").html() + text);
+                    let static = data.static, runtime = data.runtime;
+
+                    var text = "";
+
+                    if (static.length !== 0) {
+                        let class_ = static[0] === 1 ? "error" : "info";
+                        text += "<br>STATIC: " +
+                            "<span class='" + class_ + "'>" +
+                            (static[0] === 1 ? "Error: " + static[1] : static[1]) + "</span>";
+                    }
+
+                    if (runtime.length !== 0) {
+                        let class_ = runtime[0] === 1 ? "error" : "info";
+                        text += "<br>RUNTIME: " +
+                            "<span class='" + class_ + "'>" +
+                            (runtime[0] === 1 ? "Error: " + runtime[1] : runtime[1]) + "</span>";
+                    }
+
+                    debug_output.html(debug_output.html() + "<br>-----------------" + text);
+                    validate_button.html("Validate");
+                    validate_button.prop("disabled", false);
+
+                    // Parser output
+                    let output = data.runtime_output;
+
+                    parser_output.empty();
+
+                    if (!jQuery.isEmptyObject(output)) {
+                        parser_output.append(output.text);
+
+                        for (let i = 0; i < output.img.length; i++) {
+                            parser_output.append("<img width='100%' src='data:image/png;base64," + output.img[i] + "'>");
+                        }
+                    }
                 }
             });
+
+            validate_button.html("<div class='loader'></div>");
+            validate_button.prop("disabled", true);
         }
+
+        function add_debug_input_uid(val) {
+            debug_input_uid.append("<option value='" + val + "'>" + val + "</option>");
+        }
+
+        debug_input_type.change(
+            function() {
+                let selected = debug_input_type.val();
+
+                debug_input_uid.empty();
+
+                switch (selected) {
+                    default:
+                        break;
+                    case "sample":
+                        {{ samples_uids|safe }}.forEach(add_debug_input_uid);
+                        break;
+                    case "experiment":
+                        {{ experiments_uids|safe }}.forEach(add_debug_input_uid);
+                        break;
+                    case "batch":
+                        {{ batches_uids|safe }}.forEach(add_debug_input_uid);
+                        break;
+                }
+            }
+        );
     </script>
 {% endblock %}
 
@@ -73,14 +182,32 @@
         pass"}}
 </div>
                 {{ macros.render_field(form.code) }}
-                <button type="button" class="btn btn-default" onclick="validate()">Validate</button>
+                <button type="button" class="btn btn-default" id="validate_button" onclick="validate()">Validate</button>
             {% endcall %}
         </div>
         <div class='col-xs-4'>
-            <h4>Debug output:</h4>
+            <h4>Compiler output:</h4>
             <hr>
             <div id="debug_output"
                     style="overflow: auto; height: 296px; max-height: 296px; font-family: monospace; background-color: #000000"></div>
+            <h4>Debug input:</h4>
+            <hr>
+            <div class="row">
+                <div class='col-xs-6'>
+                    <select class="form-control" id="debug_input_type">
+                        <option value="none">None</option>
+                        <option value="sample">Sample</option>
+                        <option value="experiment">Experiment</option>
+                        <option value="batch">Batch</option>
+                    </select>
+                </div>
+                <div class='col-xs-6'>
+                    <select class="form-control" id="debug_input_uid"></select>
+                </div>
+            </div>
+            <h4>Debug output:</h4>
+            <hr>
+            <div id="parser_output" class="jumbotron" style="padding: 10px;"></div>
         </div>
     </div>
 {% endblock %}

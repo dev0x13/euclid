@@ -25,8 +25,10 @@
                     {% if experiments | length == 0 %}
                         {{ macros.render_button_with_confirm(utils.icon('trash'), 'btn btn-default', url_for("Batches.delete", uid=batch.uid)) }}
                     {% else %}
-                        <button type='button' class='btn btn-default'
-                                title='Export'>{{ utils.icon('download-alt') }}</button>
+                        <a class="btn btn-default"
+                               href="{{ url_for("Batches.export", batch_uid=batch.uid) }}" role="button">
+                            {{ utils.icon('download-alt') }}
+                        </a>
                         <a class="btn btn-primary" data-toggle="modal" data-target="#parsers_modal" role="button" title="Attach parser">
                             {{ utils.icon('console') }}
                     {% endif %}
