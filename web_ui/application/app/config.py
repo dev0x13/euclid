@@ -1,10 +1,36 @@
 # -*- coding: utf-8 -*-
 
 
+class AppConfigDocker:
+    SECRET_KEY = "031@2p[{<=:0+/K"
+    DEBUG = False
+    TESTING = False
+
+    HOST = "0.0.0.0"
+
+    DB_HOST = "mongo"
+    DB_PORT = 27017
+    DB_USER = ""
+    DB_PWD = ""
+    DB_NAME = ""
+
+    DATA_ROOT_FOLDER = '/euclid_data'
+    EXP_DATA_FOLDER = DATA_ROOT_FOLDER + "/exp_data"
+    PARSERS_WORKSPACES_FOLDER = DATA_ROOT_FOLDER + '/parser_workspace'
+    PARSERS_OUTPUT_ROOT_FOLDER = DATA_ROOT_FOLDER + '/parsers_output'
+    PARSERS_OUTPUT_FOLDER_BATCHES = PARSERS_OUTPUT_ROOT_FOLDER + '/batches'
+    PARSERS_OUTPUT_FOLDER_EXPERIMENTS = PARSERS_OUTPUT_ROOT_FOLDER + '/experiments'
+    PARSERS_OUTPUT_FOLDER_SAMPLES = PARSERS_OUTPUT_ROOT_FOLDER + '/samples'
+
+    PARSERS_ENGINE_ENABLED = True
+
+
 class AppConfigLinux:
     SECRET_KEY = "031@2p[{<=:0+/K"
     DEBUG = True
     TESTING = True
+
+    HOST = "127.0.0.1"
 
     DB_HOST = "localhost"
     DB_PORT = 27017
@@ -28,6 +54,8 @@ class AppConfigWindows:
     DEBUG = True
     TESTING = True
 
+    HOST = "127.0.0.1"
+
     DB_HOST = "localhost"
     DB_PORT = 27017
     DB_USER = ""
@@ -46,4 +74,4 @@ class AppConfigWindows:
 
 
 # Change this line is you are using Linux
-AppConfig = AppConfigLinux
+AppConfig = AppConfigDocker

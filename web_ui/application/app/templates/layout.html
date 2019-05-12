@@ -28,6 +28,9 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">Experimenting <span class="caret"></span></a>
                         <ul class="dropdown-menu">
+                            {% if current_user.check_access("manage_formats") %}
+                                <li><a href='{{ url_for("Formats.index") }}'>Formats</a></li>
+                            {% endif %}
                             {% if current_user.check_access("manage_exp_data") %}
                                 <li><a href='{{ url_for("Batches.index") }}'>Batches</a></li>
                             {% endif %}

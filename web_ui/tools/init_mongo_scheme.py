@@ -5,10 +5,10 @@ from pymongo import MongoClient
 # Params #
 ##########
 
-db_host = "localhost"
+db_host = "mongo" # localhost
 db_port = 27017
-default_username = "test"
-default_password = "test"
+default_username = "admin"
+default_password = "admin"
 # isAdmin
 default_actions = int(63)
 

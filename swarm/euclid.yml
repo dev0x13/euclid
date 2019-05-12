@@ -1,30 +1,37 @@
 version: "3.3"
 
 services:
+    mongo:
+        image: mongo
+        deploy:
+            restart_policy:
+                condition: on-failure
+            placement:
+                constraints: [node.role == manager]
+        volumes:
+            - /data/db:/data/db
+        networks:
+            - net
+        ports:
+            - "27017:27017"
+    web-ui:
+        image: euclid-web-ui:latest
+        depends_on:
+            - mongo
+        deploy:
+            restart_policy:
+                condition: on-failure
+            placement:
+                constraints: [node.role == manager]
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /home/george/euclid_data:/euclid_data
+        networks:
+            - net
+        ports:
+            - "5000:5000"
 
-  mongo:
-    image: mongo
-    deploy:
-      restart_policy:
-        condition: on-failure
-      placement:
-        constraints: [node.role == manager]
-    environment:
-      - MONGO_DATA_DIR=/data/db
-      - MONGODB_USER=euclid 
-      - MONGODB_PASS=12345
-    volumes:
-      - mongodata:/data/db
-    network_mode: "host"
-#    networks:
-#      - net
-    ports:
-      - "27017:27017"
+networks:
+    net:
+       driver: overlay
 
-volumes:
-  mongodata:
-    driver: local
-
-#networks:
-#  net:
-#    driver: overlay

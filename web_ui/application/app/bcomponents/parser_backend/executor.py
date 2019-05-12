@@ -156,7 +156,7 @@ def execute(parser, batch=None, experiment=None, sample=None, clear_output=False
 
         try:
             docker_client.containers.run(
-                "euclid_parser_env",
+                "euclid-parser-env",
                 "python executor.py %s" % ("clear_output" if clear_output else ""),
                 volumes=docker_volumes
             )

@@ -21,7 +21,7 @@ def validate_parser(code):
         docker_client = docker.from_env()
 
         try:
-            docker_client.containers.run("euclid_parser_env", "python validator.py", volumes=docker_volumes)
+            docker_client.containers.run("euclid-parser-env", "python validator.py", volumes=docker_volumes)
         except ContainerError as e:
             return 1, str(e)
 

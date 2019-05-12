@@ -96,15 +96,15 @@
                     debug_input_uid: debug_input_uid.val()
                 },
                 success: function (data) {
-                    let static = data.static, runtime = data.runtime;
+                    let static_ = data.static, runtime = data.runtime;
 
-                    var text = "";
+                    let text = "";
 
-                    if (static.length !== 0) {
-                        let class_ = static[0] === 1 ? "error" : "info";
+                    if (static_.length !== 0) {
+                        let class_ = static_[0] === 1 ? "error" : "info";
                         text += "<br>STATIC: " +
                             "<span class='" + class_ + "'>" +
-                            (static[0] === 1 ? "Error: " + static[1] : static[1]) + "</span>";
+                            (static_[0] === 1 ? "Error: " + static_[1] : static_[1]) + "</span>";
                     }
 
                     if (runtime.length !== 0) {
