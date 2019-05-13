@@ -14,7 +14,7 @@ class AppConfigDocker:
     DB_PWD = ""
     DB_NAME = ""
 
-    DATA_ROOT_FOLDER = '/euclid_data'
+    DATA_ROOT_FOLDER = '/data/euclid'
     EXP_DATA_FOLDER = DATA_ROOT_FOLDER + "/exp_data"
     PARSERS_WORKSPACES_FOLDER = DATA_ROOT_FOLDER + '/parser_workspace'
     PARSERS_OUTPUT_ROOT_FOLDER = DATA_ROOT_FOLDER + '/parsers_output'

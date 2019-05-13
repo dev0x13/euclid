@@ -25,7 +25,7 @@ services:
                 constraints: [node.role == manager]
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-            - /home/george/euclid_data:/euclid_data
+            - /data/euclid:/data/euclid
         networks:
             - net
         ports:

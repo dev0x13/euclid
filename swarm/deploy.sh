@@ -1,5 +1,5 @@
 #!/bin/bash
 
-#(cd ../server; ./build_image.sh)
+(cd ../web_ui; ./docker_build.sh)
 
 docker stack deploy -c euclid.yml euclid
