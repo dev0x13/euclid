@@ -115,7 +115,7 @@
                     }
 
                     debug_output.html(debug_output.html() + "<br>-----------------" + text);
-                    validate_button.html("Validate");
+                    validate_button.html({{ _("Validate") }});
                     validate_button.prop("disabled", false);
 
                     // Parser output
@@ -168,7 +168,7 @@
 {% block page_content %}
     <div class="row">
         <div class='col-xs-8'>
-            {% call macros.render_form(form, action_text="Compile") %}
+            {% call macros.render_form(form, action_text=_("Compile")) %}
                 {{ macros.render_field(form.title, label_visible=False) }}
                 <div id="editor">{{ form.code.data if form.code.data else
 "class ParserImpl(Parser):
@@ -182,11 +182,11 @@
         pass"}}
 </div>
                 {{ macros.render_field(form.code) }}
-                <button type="button" class="btn btn-default" id="validate_button" onclick="validate()">Validate</button>
+                <button type="button" class="btn btn-default" id="validate_button" onclick="validate()">{{ _("Validate") }}</button>
             {% endcall %}
         </div>
         <div class='col-xs-4'>
-            <h4>Compiler output:</h4>
+            <h4>{{ _("Compiler output") }}:</h4>
             <hr>
             <div id="debug_output"
                     style="overflow: auto; height: 296px; max-height: 296px; font-family: monospace; background-color: #000000"></div>
@@ -195,17 +195,17 @@
             <div class="row">
                 <div class='col-xs-6'>
                     <select class="form-control" id="debug_input_type">
-                        <option value="none">None</option>
-                        <option value="sample">Sample</option>
-                        <option value="experiment">Experiment</option>
-                        <option value="batch">Batch</option>
+                        <option value="none">-</option>
+                        <option value="sample">{{ _("Sample") }}</option>
+                        <option value="experiment">{{ _("Experiment") }}</option>
+                        <option value="batch">{{ _("Batch") }}</option>
                     </select>
                 </div>
                 <div class='col-xs-6'>
                     <select class="form-control" id="debug_input_uid"></select>
                 </div>
             </div>
-            <h4>Debug output:</h4>
+            <h4>{{ _("Debug output") }}:</h4>
             <hr>
             <div id="parser_output" class="jumbotron" style="padding: 10px;"></div>
         </div>

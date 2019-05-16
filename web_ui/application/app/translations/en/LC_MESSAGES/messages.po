@@ -1,0 +1,471 @@
+# English translations for PROJECT.
+# Copyright (C) 2019 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2019.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2019-05-16 12:01+0300\n"
+"PO-Revision-Date: 2019-05-16 12:01+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+#: ../../application/app/bcomponents/parser_backend/executor.py:59
+msgid "Parsers engine disabled by config"
+msgstr ""
+
+#: ../../application/app/bcomponents/parser_backend/executor.py:168
+#: ../../application/app/bcomponents/parser_backend/validator.py:28
+msgid "All OK!"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:22
+#: ../../application/app/fcomponents/Formats/controllers.py:22
+msgid "Invalid title"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:37
+#: ../../application/app/fcomponents/Parsers/controllers.py:25
+#: ../../application/app/templates/admin/apps.html:21
+#: ../../application/app/templates/batches/batch.html:46
+#: ../../application/app/templates/batches/batches.html:38
+#: ../../application/app/templates/parsers/parsers.html:23
+msgid "Title"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:41
+#: ../../application/app/templates/admin/users.html:21
+msgid "Username"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:42
+#: ../../application/app/templates/admin/users.html:22
+msgid "Email"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:43
+msgid "Password"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:44
+msgid "Repeat password"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:48
+msgid "Is admin"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:49
+msgid "Can manage parsers"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:50
+msgid "Can manage experiment data"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:51
+msgid "Can view experiment data"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:52
+msgid "Can create formats"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:53
+msgid "Can generate reports"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:76
+msgid "External apps"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:90
+#: ../../application/app/templates/layout.html:65
+msgid "Users"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:128
+msgid "Passwords doesn't match"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:133
+msgid "Password cannot be empty"
+msgstr ""
+
+#: ../../application/app/fcomponents/Admin/controllers.py:163
+msgid "User"
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:29
+msgid "Format: "
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:30
+#: ../../application/app/fcomponents/Parsers/controllers.py:25
+msgid "Title: "
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:31
+msgid "Experiment format: "
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:35
+msgid "Parser: "
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:86
+msgid "Batch is locked"
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:129
+#: ../../application/app/templates/layout.html:35
+msgid "Batches"
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:139
+#: ../../application/app/fcomponents/Experiments/controllers.py:195
+msgid "Nothing selected"
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:146
+#: ../../application/app/fcomponents/Experiments/controllers.py:205
+msgid "No format selected"
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:153
+#: ../../application/app/fcomponents/Experiments/controllers.py:212
+#: ../../application/app/fcomponents/Formats/controllers.py:80
+msgid "Unable to parse JSON"
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:176
+msgid "Add batch"
+msgstr ""
+
+#: ../../application/app/fcomponents/Batches/controllers.py:252
+#: ../../application/app/templates/experiments/experiment.html:49
+#: ../../application/app/templates/experiments/experiments.html:37
+#: ../../application/app/templates/parsers/create_parser.html:201
+msgid "Batch"
+msgstr ""
+
+#: ../../application/app/fcomponents/Common/__init__.py:94
+msgid "Format doesn't match with metadata. Key missing: "
+msgstr ""
+
+#: ../../application/app/fcomponents/Common/__init__.py:104
+msgid "Format doesn't match with metadata. Invalid value type for key: "
+msgstr ""
+
+#: ../../application/app/fcomponents/Experiments/controllers.py:139
+msgid "Experiment is locked"
+msgstr ""
+
+#: ../../application/app/fcomponents/Experiments/controllers.py:185
+#: ../../application/app/templates/batches/batch.html:53
+#: ../../application/app/templates/layout.html:38
+msgid "Experiments"
+msgstr ""
+
+#: ../../application/app/fcomponents/Experiments/controllers.py:200
+msgid "No batch"
+msgstr ""
+
+#: ../../application/app/fcomponents/Experiments/controllers.py:245
+msgid "Add experiment"
+msgstr ""
+
+#: ../../application/app/fcomponents/Experiments/controllers.py:361
+#: ../../application/app/templates/parsers/create_parser.html:200
+msgid "Experiment"
+msgstr ""
+
+#: ../../application/app/fcomponents/Experiments/controllers.py:401
+#: ../../application/app/templates/parsers/create_parser.html:199
+msgid "Sample"
+msgstr ""
+
+#: ../../application/app/fcomponents/Formats/controllers.py:27
+msgid "Format with specified title already exists"
+msgstr ""
+
+#: ../../application/app/fcomponents/Formats/controllers.py:38
+msgid "The format is used by following batch:"
+msgstr ""
+
+#: ../../application/app/fcomponents/Formats/controllers.py:41
+msgid "The format is used by some experiments"
+msgstr ""
+
+#: ../../application/app/fcomponents/Formats/controllers.py:66
+#: ../../application/app/templates/layout.html:32
+#: ../../application/app/templates/layout.html:44
+msgid "Formats"
+msgstr ""
+
+#: ../../application/app/fcomponents/Formats/controllers.py:93
+msgid "Add format"
+msgstr ""
+
+#: ../../application/app/fcomponents/Parsers/controllers.py:59
+msgid "Some batches use this parser"
+msgstr ""
+
+#: ../../application/app/fcomponents/Parsers/controllers.py:64
+msgid "Some experiments use this parser"
+msgstr ""
+
+#: ../../application/app/fcomponents/Parsers/controllers.py:74
+#: ../../application/app/templates/batches/batch.html:86
+#: ../../application/app/templates/experiments/experiment.html:101
+#: ../../application/app/templates/experiments/sample.html:43
+msgid "Parsers"
+msgstr ""
+
+#: ../../application/app/fcomponents/Parsers/controllers.py:112
+#: ../../application/app/fcomponents/Parsers/controllers.py:119
+#: ../../application/app/fcomponents/Parsers/controllers.py:126
+msgid "Input not found"
+msgstr ""
+
+#: ../../application/app/fcomponents/Parsers/controllers.py:130
+msgid "Invalid input type"
+msgstr ""
+
+#: ../../application/app/fcomponents/Parsers/controllers.py:174
+msgid "Validation error: "
+msgstr ""
+
+#: ../../application/app/fcomponents/Parsers/controllers.py:196
+msgid "Create parser"
+msgstr ""
+
+#: ../../application/app/fcomponents/Parsers/controllers.py:222
+msgid "Parser"
+msgstr ""
+
+#: ../../application/app/fcomponents/User/controllers.py:14
+msgid "Username:"
+msgstr ""
+
+#: ../../application/app/fcomponents/User/controllers.py:15
+msgid "Password:"
+msgstr ""
+
+#: ../../application/app/fcomponents/User/controllers.py:28
+msgid "Wrong username or password"
+msgstr ""
+
+#: ../../application/app/fcomponents/User/controllers.py:30
+#: ../../application/app/templates/login.html:25
+msgid "Login"
+msgstr ""
+
+#: ../../application/app/fcomponents/User/models.py:41
+msgid "Invalid username or password"
+msgstr ""
+
+#: ../../application/app/fcomponents/User/models.py:47
+msgid "Non unique username"
+msgstr ""
+
+#: ../../application/app/templates/index.html:4
+msgid "Welcome to Euclid storage!"
+msgstr ""
+
+#: ../../application/app/templates/layout.html:29
+msgid "Experimenting"
+msgstr "Data"
+
+#: ../../application/app/templates/layout.html:52
+msgid "Manage"
+msgstr ""
+
+#: ../../application/app/templates/layout.html:53
+msgid "Docs"
+msgstr ""
+
+#: ../../application/app/templates/layout.html:66
+msgid "Apps"
+msgstr ""
+
+#: ../../application/app/templates/layout.html:73
+msgid "Logout"
+msgstr ""
+
+#: ../../application/app/templates/login.html:12
+msgid "Please login"
+msgstr ""
+
+#: ../../application/app/templates/macros.html:46
+msgid "Are you sure?"
+msgstr ""
+
+#: ../../application/app/templates/admin/apps.html:15
+#: ../../application/app/templates/admin/apps.html:48
+#: ../../application/app/templates/experiments/create_experiment.html:72
+#: ../../application/app/templates/experiments/experiment.html:69
+#: ../../application/app/templates/experiments/experiments.html:29
+msgid "Add"
+msgstr ""
+
+#: ../../application/app/templates/admin/apps.html:22
+msgid "Key"
+msgstr ""
+
+#: ../../application/app/templates/admin/apps.html:23
+#: ../../application/app/templates/batches/batch.html:47
+#: ../../application/app/templates/batches/batch.html:63
+#: ../../application/app/templates/batches/batches.html:40
+#: ../../application/app/templates/experiments/experiment.html:57
+#: ../../application/app/templates/experiments/experiment.html:77
+#: ../../application/app/templates/experiments/experiments.html:38
+#: ../../application/app/templates/experiments/sample.html:35
+#: ../../application/app/templates/parsers/parsers.html:22
+msgid "Creator"
+msgstr ""
+
+#: ../../application/app/templates/admin/apps.html:45
+msgid "Add external app"
+msgstr ""
+
+#: ../../application/app/templates/admin/user.html:4
+msgid "Save"
+msgstr ""
+
+#: ../../application/app/templates/admin/user.html:10
+msgid "Actions"
+msgstr ""
+
+#: ../../application/app/templates/admin/users.html:15
+#: ../../application/app/templates/batches/create_batch.html:46
+#: ../../application/app/templates/formats/create_format.html:36
+#: ../../application/app/templates/parsers/parsers.html:15
+msgid "Create"
+msgstr ""
+
+#: ../../application/app/templates/batches/batch.html:32
+#: ../../application/app/templates/batches/batch.html:125
+#: ../../application/app/templates/experiments/experiment.html:29
+#: ../../application/app/templates/experiments/experiment.html:149
+msgid "Attach parser"
+msgstr ""
+
+#: ../../application/app/templates/batches/batch.html:42
+#: ../../application/app/templates/experiments/experiment.html:39
+#: ../../application/app/templates/experiments/sample.html:32
+msgid "Info"
+msgstr ""
+
+#: ../../application/app/templates/batches/batch.html:45
+#: ../../application/app/templates/batches/batch.html:62
+#: ../../application/app/templates/batches/batches.html:39
+#: ../../application/app/templates/experiments/experiment.html:48
+#: ../../application/app/templates/experiments/experiments.html:36
+msgid "Creation time"
+msgstr ""
+
+#: ../../application/app/templates/batches/batch.html:48
+#: ../../application/app/templates/batches/batches.html:41
+#: ../../application/app/templates/experiments/experiment.html:58
+#: ../../application/app/templates/experiments/experiments.html:39
+msgid "Meta"
+msgstr ""
+
+#: ../../application/app/templates/batches/batch.html:77
+#: ../../application/app/templates/experiments/experiment.html:42
+#: ../../application/app/templates/experiments/experiments.html:64
+msgid "Unlocked"
+msgstr ""
+
+#: ../../application/app/templates/batches/batch.html:88
+#: ../../application/app/templates/experiments/experiment.html:103
+#: ../../application/app/templates/experiments/sample.html:45
+msgid "Attached parsers"
+msgstr ""
+
+#: ../../application/app/templates/batches/batch.html:106
+#: ../../application/app/templates/experiments/experiment.html:125
+#: ../../application/app/templates/experiments/sample.html:59
+msgid "Output"
+msgstr ""
+
+#: ../../application/app/templates/batches/batch.html:128
+#: ../../application/app/templates/experiments/experiment.html:152
+msgid "Attach"
+msgstr ""
+
+#: ../../application/app/templates/batches/create_batch.html:50
+#: ../../application/app/templates/experiments/create_experiment.html:76
+msgid "Metadata"
+msgstr ""
+
+#: ../../application/app/templates/errors/403.html:4
+msgid "Forbidden"
+msgstr ""
+
+#: ../../application/app/templates/errors/404.html:4
+msgid "Not Found"
+msgstr ""
+
+#: ../../application/app/templates/errors/500.html:4
+msgid "Internal Error"
+msgstr ""
+
+#: ../../application/app/templates/experiments/experiment.html:26
+msgid "Export"
+msgstr ""
+
+#: ../../application/app/templates/experiments/experiment.html:44
+msgid "Locked"
+msgstr ""
+
+#: ../../application/app/templates/experiments/experiment.html:63
+msgid "Samples"
+msgstr ""
+
+#: ../../application/app/templates/experiments/experiment.html:76
+#: ../../application/app/templates/experiments/sample.html:36
+msgid "File"
+msgstr ""
+
+#: ../../application/app/templates/experiments/experiment.html:122
+#: ../../application/app/templates/experiments/experiment.html:139
+#: ../../application/app/templates/experiments/sample.html:56
+#: ../../application/app/templates/experiments/sample.html:73
+msgid "None"
+msgstr ""
+
+#: ../../application/app/templates/experiments/sample.html:37
+msgid "Experiment UID"
+msgstr ""
+
+#: ../../application/app/templates/experiments/sample.html:38
+msgid "Experiment meta"
+msgstr ""
+
+#: ../../application/app/templates/parsers/create_parser.html:118
+#: ../../application/app/templates/parsers/create_parser.html:185
+msgid "Validate"
+msgstr ""
+
+#: ../../application/app/templates/parsers/create_parser.html:171
+msgid "Compile"
+msgstr ""
+
+#: ../../application/app/templates/parsers/create_parser.html:189
+msgid "Compiler output"
+msgstr ""
+
+#: ../../application/app/templates/parsers/create_parser.html:208
+msgid "Debug output"
+msgstr ""
+

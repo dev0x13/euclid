@@ -12,14 +12,14 @@
 {% endblock %}
 
 {% block page_content %}
-    <a class="btn btn-primary" href="{{ url_for('Admin.user') }}" role="button">Create</a>
+    <a class="btn btn-primary" href="{{ url_for('Admin.user') }}" role="button">{{ _("Create") }}</a>
     <br>
     <br>
     <table class='table table-striped table-hover' data-pagination="true" data-toggle="table">
         <thead>
         <tr>
-            <th data-field="a" data-sortable="true">Username</th>
-            <th data-field="b" data-sortable="true">Email</th>
+            <th data-field="a" data-sortable="true">{{ _("Username") }}</th>
+            <th data-field="b" data-sortable="true">{{ _("Email") }}</th>
             <th class="col-xs-1"></th>
         </tr>
         </thead>

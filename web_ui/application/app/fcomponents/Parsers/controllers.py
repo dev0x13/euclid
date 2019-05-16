@@ -6,13 +6,12 @@ import uuid
 from flask import Blueprint, redirect, url_for, render_template, request, jsonify, abort
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, SelectField, validators, StringField
+from flask_babel import _, lazy_gettext
+from wtforms import HiddenField, validators, StringField
 
 from app.fcomponents import Common
-from app.fcomponents.Formats.controllers import FormatModel
 from app.fcomponents.Common import ModelFactory
 from app.fcomponents.User.models import UserModel
-from app.bcomponents.parser_backend.executor import PARSER_BASE
 from app.bcomponents.parser_backend.validator import validate_parser
 from app.bcomponents.parser_backend.executor import execute
 
@@ -23,7 +22,7 @@ module = Blueprint("Parsers", __name__, url_prefix="/parsers")
 
 class ParserForm(FlaskForm):
     code = HiddenField()
-    title = StringField("Title: ", validators=[validators.DataRequired()], render_kw={"placeholder": "Title"})
+    title = StringField(lazy_gettext("Title: "), validators=[validators.DataRequired()], render_kw={"placeholder": lazy_gettext("Title")})
 
 
 class ParserModel(ModelFactory.produce("parsers",
@@ -57,12 +56,12 @@ class ParserModel(ModelFactory.produce("parsers",
         for b in BatchModel.load_all():
             if b.parsers_uids:
                 if uid in b.parsers_uids:
-                    raise ValueError("Some batches use this parser")
+                    raise ValueError(_("Some batches use this parser"))
 
         for e in ExpModel.load_all():
             if e.parsers_uids:
                 if uid in e.parsers_uids:
-                    raise ValueError("Some experiments use this parser")
+                    raise ValueError(_("Some experiments use this parser"))
 
         super().delete(uid)
 
@@ -72,7 +71,7 @@ class ParserModel(ModelFactory.produce("parsers",
 def index():
     parsers = ParserModel.load_all()
 
-    return render_template("parsers/parsers.html", parsers=parsers, title="Parsers")
+    return render_template("parsers/parsers.html", parsers=parsers, title=_("Parsers"))
 
 
 @module.route("/validate", methods=Common.http_methods)
@@ -110,25 +109,25 @@ def validate():
                 if sample:
                     runtime_validation_res = execute(tmp_parser, sample=sample, custom_output_dir=tmp_output_dir)
                 else:
-                    runtime_validation_res = (1, "Input not found")
+                    runtime_validation_res = (1, _("Input not found"))
             elif input_type == "experiment":
                 experiment = ExpModel.load(input_uid)
 
                 if experiment:
                     runtime_validation_res = execute(tmp_parser, experiment=experiment, custom_output_dir=tmp_output_dir)
                 else:
-                    runtime_validation_res = (1, "Input not found")
+                    runtime_validation_res = (1, _("Input not found"))
             elif input_type == "batch":
                 batch = BatchModel.load(input_uid)
 
                 if batch:
                     runtime_validation_res = execute(tmp_parser, batch=batch, custom_output_dir=tmp_output_dir)
                 else:
-                    runtime_validation_res = (1, "Input not found")
+                    runtime_validation_res = (1, _("Input not found"))
             elif input_type == "none":
                 pass
             else:
-                runtime_validation_res = (1, "Invalid input type")
+                runtime_validation_res = (1, _("Invalid input type"))
 
             if runtime_validation_res and runtime_validation_res[0] == 0:
                 parser_txt = os.path.join(tmp_output_dir, "%s.txt" % tmp_parser.uid)
@@ -172,7 +171,7 @@ def create():
         code, msg = validate_parser(form.code.data)
 
         if code != 0:
-            Common.flash("Validation error: " + msg, category="danger")
+            Common.flash(_("Validation error: ") + msg, category="danger")
         else:
             parser = ParserModel()
             parser.title = form.title.data
@@ -194,7 +193,7 @@ def create():
         samples_uids=samples_uids,
         experiments_uids=experiments_uids,
         batches_uids=batches_uids,
-        title="Create parser"
+        title=_("Create parser")
     )
 
 
@@ -220,7 +219,7 @@ def view(uid):
     return render_template(
         "parsers/parser.html",
         parser=parser,
-        title="Parser"
+        title=_("Parser")
     )
 
 

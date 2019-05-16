@@ -1,0 +1,3 @@
+1. Edit code (*.py, *.html), add lines that need translation like this _("<line>")
+2. Edit /application/app/translations/<locale>/LC_MESSAGES/messages.po to add translations
+3. Run ./babel_compile.sh 

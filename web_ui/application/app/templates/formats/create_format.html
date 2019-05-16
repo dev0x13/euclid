@@ -33,7 +33,7 @@
 {% endblock %}
 
 {% block page_content %}
-    {% call macros.render_form(form, action_text="Create") %}
+    {% call macros.render_form(form, action_text=_("Create")) %}
         {{ macros.render_field(form.title, label_visible=False) }}
         <div id="editor">{{ form.format.data if form.format.data else "" }}</div>
         {{ macros.render_field(form.format) }}

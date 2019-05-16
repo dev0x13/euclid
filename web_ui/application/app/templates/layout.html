@@ -26,51 +26,59 @@
                 <ul class='nav navbar-nav'>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                           aria-expanded="false">Experimenting <span class="caret"></span></a>
+                           aria-expanded="false">{{ _("Experimenting") }} <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             {% if current_user.check_access("manage_formats") %}
-                                <li><a href='{{ url_for("Formats.index") }}'>Formats</a></li>
+                                <li><a href='{{ url_for("Formats.index") }}'>{{ _("Formats") }}</a></li>
                             {% endif %}
                             {% if current_user.check_access("manage_exp_data") %}
-                                <li><a href='{{ url_for("Batches.index") }}'>Batches</a></li>
+                                <li><a href='{{ url_for("Batches.index") }}'>{{ _("Batches") }}</a></li>
                             {% endif %}
                             {% if current_user.check_access("manage_exp_data") %}
-                                <li><a href='{{ url_for("Experiments.index") }}'>Experiments</a></li>
+                                <li><a href='{{ url_for("Experiments.index") }}'>{{ _("Experiments") }}</a></li>
                             {% endif %}
                         </ul>
                     </li>
 
                     {% if current_user.check_access("maange_formats") %}
-                        <li><a href="{{ url_for("Formats.index") }}">Formats</a></li>
+                        <li><a href="{{ url_for("Formats.index") }}">{{ _("Formats") }}</a></li>
                     {% endif %}
 
                     {% if current_user.check_access("manage_parsers") %}
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                               aria-expanded="false">Parsers <span class="caret"></span></a>
+                               aria-expanded="false">{{ _("Parsers") }}<span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a href="{{ url_for("Parsers.index") }}">Manage</a></li>
-                                <li><a href="{{ url_for("Parsers.docs") }}">Docs</a></li>
+                                <li><a href="{{ url_for("Parsers.index") }}">{{ _("Manage") }}</a></li>
+                                <li><a href="{{ url_for("Parsers.docs") }}">{{ _("Docs") }}</a></li>
                             </ul>
                         </li>
                     {% endif %}
 
-                    <li><a href="#">Tools</a></li>
+                    <li><a href="#">{{ _("Tools") }}</a></li>
 
                     {% if current_user.check_access("is_admin") %}
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                               aria-expanded="false">Admin <span class="caret"></span></a>
+                               aria-expanded="false">{{ _("Admin") }}<span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><a href='{{ url_for("Admin.users") }}'>Users</a></li>
-                                <li><a href='{{ url_for("Admin.apps") }}'>Apps</a></li>
+                                <li><a href='{{ url_for("Admin.users") }}'>{{ _("Users") }}</a></li>
+                                <li><a href='{{ url_for("Admin.apps") }}'>{{ _("Apps") }}</a></li>
                             </ul>
                         </li>
                     {% endif %}
                 </ul>
 
                 <ul class='nav navbar-nav navbar-right'>
-                    <li><a href='{{ url_for("User.logout") }}'>Logout</a></li>
+                    <li style="margin-top: 6px">
+                        <form class="navbar-form form-inline">
+                            <div class="btn-group" role="group">
+                              <a type="button" href="{{ url_for("User.change_locale", locale="en") }}" class="btn btn-xs {{ "btn-primary" if current_user.locale == "en" else "" }}">EN</a>
+                              <a type="button" href="{{ url_for("User.change_locale", locale="ru") }}" class="btn btn-xs {{ "btn-primary" if current_user.locale == "ru" else "" }}">RU</a>
+                            </div>
+                        </form>
+                    </li>
+                    <li><a href='{{ url_for("User.logout") }}'>{{ _("Logout") }}</a></li>
                 </ul>
             </div>
         </div>

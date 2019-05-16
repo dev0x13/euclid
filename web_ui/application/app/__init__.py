@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 
-from flask import Flask, request, redirect, url_for, render_template
+from flask_babel import Babel
+from flask import Flask, request, redirect, url_for, render_template, g
 from flask_login import LoginManager, current_user
 from flask_bootstrap import Bootstrap
 from pymongo import MongoClient
@@ -16,6 +17,7 @@ from app.fcomponents.User.models import UserModel
 
 def create_app():
     app = Flask(__name__)
+    babel = Babel(app)
 
     Bootstrap(app)
 
@@ -77,6 +79,13 @@ def create_app():
     @app.route('/')
     def index():
         return render_template("index.html")
+
+    @babel.localeselector
+    def get_locale():
+        if current_user.is_authenticated:
+            return current_user.locale
+
+        return request.accept_languages.best_match(['de', 'fr', 'en'])
 
     return app
 

@@ -29,7 +29,7 @@
                                href="{{ url_for("Batches.export", batch_uid=batch.uid) }}" role="button">
                             {{ utils.icon('download-alt') }}
                         </a>
-                        <a class="btn btn-primary" data-toggle="modal" data-target="#parsers_modal" role="button" title="Attach parser">
+                        <a class="btn btn-primary" data-toggle="modal" data-target="#parsers_modal" role="button" title="{{ _("Attach parser") }}">
                             {{ utils.icon('console') }}
                     {% endif %}
                     </a>
@@ -39,18 +39,18 @@
     </div>
     <div class='row'>
         <div class='col-xs-3'>
-            <h3>Info</h3>
+            <h3>{{ _("Info") }}</h3>
             <hr>
             <p><b>UID:</b></p> {{ batch.uid }} <br><br>
-            <p><b>Creation time:</b></p> {{ batch.timestamp.strftime('%d.%m.%Y %H:%M') }} <br><br>
-            <p><b>Title:</b></p> {{ batch.title }} <br><br>
-            <p><b>Creator:</b></p> {{ batch.creator_name }} <br><br>
-            <p><b>Meta:</b></p>
+            <p><b>{{ _("Creation time") }}:</b></p> {{ batch.timestamp.strftime('%d.%m.%Y %H:%M') }} <br><br>
+            <p><b>{{ _("Title") }}:</b></p> {{ batch.title }} <br><br>
+            <p><b>{{ _("Creator") }}:</b></p> {{ batch.creator_name }} <br><br>
+            <p><b>{{ _("Meta") }}:</b></p>
             <div class="json_data">{{ batch.meta|safe }}</div>
             <br><br>
         </div>
         <div class='col-xs-5'>
-            <h3>Experiments</h3>
+            <h3>{{ _("Experiments") }}</h3>
             <hr>
             <a class="btn btn-primary" href="{{ url_for("Experiments.create", batch_uid=batch.uid) }}"
                role="button">Add</a>
@@ -59,8 +59,8 @@
                 <thead>
                 <tr>
                     <th data-field="d" data-sortable="true">UID</th>
-                    <th data-field="a" data-sortable="true">Creation time</th>
-                    <th data-field="b" data-sortable="true">Creator</th>
+                    <th data-field="a" data-sortable="true">{{ _("Creation time") }}</th>
+                    <th data-field="b" data-sortable="true">{{ _("Creator") }}</th>
                     <th class="col-xs-1"></th>
                 </tr>
                 </thead>
@@ -74,7 +74,7 @@
                             <a class="btn btn-sm" href="{{ url_for("Experiments.view", uid=f.uid) }}"
                                role="button">{{ utils.icon('eye-open') }}</a>
                             {% if not f.locked %}
-                                <span class="label label-danger">Unlocked</span>
+                                <span class="label label-danger">{{ _("Unlocked") }}</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -83,9 +83,9 @@
             </table>
         </div>
         <div class='col-xs-4'>
-            <h3>Parsers</h3>
+            <h3>{{ _("Parsers") }}</h3>
             <hr>
-            <h4>Attached parsers</h4>
+            <h4>{{ _("Attached parsers") }}</h4>
             {% for p in batch_parsers %}
                 <div class="panel panel-default">
                     <div class="panel-body" style="padding: 0px">
@@ -103,7 +103,7 @@
                 </div>
             {% endfor %}
             <hr>
-            <h4>Output</h4>
+            <h4>{{ _("Output") }}</h4>
             {% for p in batch_parsers %}
                 <div class="jumbotron" style="padding: 10px;">
                     <b>{{ p["parser"].title }}</b>
@@ -122,10 +122,10 @@
             <div class='modal-content'>
                 <div class='modal-header'>
                     <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>
-                    <h4 class='modal-title' id='handbook_modal_label'>Attach parser</h4>
+                    <h4 class='modal-title' id='handbook_modal_label'>{{ _("Attach parser") }}</h4>
                 </div>
                 <div class='modal-body'>
-                    {% call macros.render_form(form, action_text="Attach") %}
+                    {% call macros.render_form(form, action_text=_("Attach")) %}
                         {{ macros.render_field(form.parser_uid) }}
                     {% endcall %}
                 </div>

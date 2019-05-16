@@ -9,6 +9,7 @@ from bson import ObjectId
 from flask import Blueprint, redirect, url_for, render_template, request, send_from_directory, abort, send_file
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
+from flask_babel import _, lazy_gettext
 from wtforms import HiddenField, SelectField, StringField, validators
 
 from app.fcomponents import Common
@@ -25,13 +26,13 @@ module = Blueprint("Batches", __name__, url_prefix="/batches")
 
 class BatchForm(FlaskForm):
     meta_ = HiddenField()
-    format_uid = SelectField("Format: ", default=None, validators=[validators.DataRequired()])
-    title = StringField("Title: ", validators=[validators.DataRequired()])
-    exp_format_uid = SelectField("Experiment format: ", default=None, validators=[validators.DataRequired()])
+    format_uid = SelectField(lazy_gettext("Format: "), default=None, validators=[validators.DataRequired()])
+    title = StringField(lazy_gettext("Title: "), validators=[validators.DataRequired()])
+    exp_format_uid = SelectField(lazy_gettext("Experiment format: "), default=None, validators=[validators.DataRequired()])
 
 
 class AttachParserForm(FlaskForm):
-    parser_uid = SelectField("Parser: ", default=None, validators=[validators.DataRequired()])
+    parser_uid = SelectField(lazy_gettext("Parser: "), default=None, validators=[validators.DataRequired()])
 
 
 class BatchModel(ModelFactory.produce("batches",
@@ -82,7 +83,7 @@ class BatchModel(ModelFactory.produce("batches",
         experiments = ExpModel.load_all_by_batch(uid)
 
         if len(experiments) != 0:
-            raise ValueError("Batch is locked")
+            raise ValueError(_("Batch is locked"))
 
         super().delete(uid)
 
@@ -125,7 +126,7 @@ class BatchModel(ModelFactory.produce("batches",
 def index():
     batches = BatchModel.load_all()
 
-    return render_template("batches/batches.html", batches=batches, title="Batches")
+    return render_template("batches/batches.html", batches=batches, title=_("Batches"))
 
 
 @module.route("/create", methods=Common.http_methods)
@@ -135,21 +136,21 @@ def create():
 
     formats = FormatModel.load_all()
 
-    form.format_uid.choices = [(0, "Nothing selected")]
+    form.format_uid.choices = [(0, _("Nothing selected"))]
     form.format_uid.choices += [(a.uid, a.title) for a in formats]
 
     form.exp_format_uid.choices = form.format_uid.choices
 
     if form.validate_on_submit():
         if form.format_uid == 0 or form.exp_format_uid == 0:
-            Common.flash("No format selected", category="danger")
+            Common.flash(_("No format selected"), category="danger")
         else:
             meta_json = form.meta_.data
 
             try:
                 json.loads(meta_json)
             except ValueError:
-                Common.flash("Unable to parse JSON", category="danger")
+                Common.flash(_("Unable to parse JSON"), category="danger")
             else:
                 batch = BatchModel()
                 batch.meta = meta_json
@@ -172,7 +173,7 @@ def create():
         "batches/create_batch.html",
         form=form,
         formats=formats,
-        title="Add batch"
+        title=_("Add batch")
     )
 
 
@@ -248,7 +249,7 @@ def view(uid):
         batch=batch,
         batch_parsers=batch_parsers,
         experiments=experiments,
-        title="Batch"
+        title=_("Batch")
     )
 
 

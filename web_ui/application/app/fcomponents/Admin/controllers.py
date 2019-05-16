@@ -8,6 +8,8 @@ from wtforms import StringField, BooleanField, validators, PasswordField
 from app.fcomponents import Common
 from app.fcomponents.Common import ModelFactory
 from app.fcomponents.User.models import UserModel
+from flask_babel import _, lazy_gettext
+
 
 from werkzeug.security import generate_password_hash
 
@@ -17,7 +19,7 @@ module = Blueprint("Admin", __name__, url_prefix="/admin")
 class AppModel(ModelFactory.produce("apps", ["key", "title", "creator_id"])):
     def save(self):
         if self.title == "":
-            raise ValueError("Invalid title")
+            raise ValueError(_("Invalid title"))
 
         super().save()
 
@@ -32,23 +34,23 @@ class AppModel(ModelFactory.produce("apps", ["key", "title", "creator_id"])):
 
 
 class AppForm(FlaskForm):
-    title = StringField([validators.DataRequired()], render_kw={"placeholder": "Title"})
+    title = StringField([validators.DataRequired()], render_kw={"placeholder": lazy_gettext("Title")})
 
 
 class UserForm(FlaskForm):
-    username = StringField([validators.DataRequired()], render_kw={"placeholder": "Username"})
-    email = StringField([validators.DataRequired()], render_kw={"placeholder": "Email"})
-    password = PasswordField(render_kw={"placeholder": "Password"})
-    repeat_password = PasswordField(render_kw={"placeholder": "Repeat password"})
+    username = StringField([validators.DataRequired()], render_kw={"placeholder": lazy_gettext("Username")})
+    email = StringField([validators.DataRequired()], render_kw={"placeholder": lazy_gettext("Email")})
+    password = PasswordField(render_kw={"placeholder": lazy_gettext("Password")})
+    repeat_password = PasswordField(render_kw={"placeholder": lazy_gettext("Repeat password")})
 
     # Actions
 
-    is_admin = BooleanField('Is admin')
-    manage_parsers = BooleanField('Can manage parsers')
-    manage_exp_data = BooleanField('Can manage experiment data')
-    view_exp_data = BooleanField('Can view experiment data')
-    manage_formats = BooleanField('Can create formats')
-    generate_reports = BooleanField('Can generate reports')
+    is_admin = BooleanField(lazy_gettext('Is admin'))
+    manage_parsers = BooleanField(lazy_gettext('Can manage parsers'))
+    manage_exp_data = BooleanField(lazy_gettext('Can manage experiment data'))
+    view_exp_data = BooleanField(lazy_gettext('Can view experiment data'))
+    manage_formats = BooleanField(lazy_gettext('Can create formats'))
+    generate_reports = BooleanField(lazy_gettext('Can generate reports'))
 
 
 @module.route("/apps", methods=Common.http_methods)
@@ -71,7 +73,7 @@ def apps():
         else:
             return redirect(url_for("Admin.apps"))
 
-    return render_template("admin/apps.html", apps=apps_, form=form, title="External apps")
+    return render_template("admin/apps.html", apps=apps_, form=form, title=_("External apps"))
 
 
 @module.route("/apps/delete/<uid>")
@@ -85,7 +87,7 @@ def delete_app(uid):
 def users():
     users_ = UserModel.load_all()
 
-    return render_template("admin/users.html", users=users_, title="Users")
+    return render_template("admin/users.html", users=users_, title=_("Users"))
 
 
 @module.route("/create_user", defaults={"uid": None}, methods=Common.http_methods)
@@ -123,12 +125,12 @@ def user(uid):
 
             if form.password.data:
                 if form.password.data != form.repeat_password.data:
-                    raise ValueError("Passwords doesn't match")
+                    raise ValueError(_("Passwords doesn't match"))
 
                 password = generate_password_hash(form.password.data)
             else:
                 if not uid:
-                    raise ValueError("Password cannot be empty")
+                    raise ValueError(_("Password cannot be empty"))
 
             action_mask = mask
             email = form.email.data
@@ -158,7 +160,7 @@ def user(uid):
 
     form.process()
 
-    return render_template("admin/user.html", form=form, user=user, title="User")
+    return render_template("admin/user.html", form=form, user=user, title=_("User"))
 
 
 @module.route("/users/<uid>/delete")

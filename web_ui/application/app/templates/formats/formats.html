@@ -27,13 +27,13 @@
 {% endblock %}
 
 {% block page_content %}
-<a class="btn btn-primary" href="{{ url_for('Formats.create') }}" role="button">Create</a>
+<a class="btn btn-primary" href="{{ url_for('Formats.create') }}" role="button">{{ _("Create") }}</a>
 <br>
 <br>
 <table class='table table-striped table-hover' data-pagination="true" data-toggle="table" id="formats">
     <thead>
     <tr>
-        <th data-field="a" data-sortable="true">Title</th>
+        <th data-field="a" data-sortable="true">{{ _("Title") }}</th>
         <th data-field="b" data-sortable="false">JSON</th>
         <th class="col-xs-1"></th>
     </tr>

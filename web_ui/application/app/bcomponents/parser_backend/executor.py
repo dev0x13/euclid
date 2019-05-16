@@ -3,6 +3,8 @@ import os
 import uuid
 from contextlib import contextmanager
 
+from flask_babel import _
+
 import docker
 import pickle
 
@@ -54,7 +56,7 @@ def execute(parser, batch=None, experiment=None, sample=None, clear_output=False
     from app.fcomponents.Experiments.controllers import ExpModel, SampleModel
 
     if not AppConfig.PARSERS_ENGINE_ENABLED:
-        return 1, "Parsers engine disabled by config"
+        return 1, _("Parsers engine disabled by config")
 
     with parser_tmp_workspace() as tmp_workspace_path:
         open(os.path.join(tmp_workspace_path, "__init__.py"), 'a').close()
@@ -163,4 +165,4 @@ def execute(parser, batch=None, experiment=None, sample=None, clear_output=False
         except ContainerError as e:
             return 1, str(e)
 
-        return 0, "All OK!"
+        return 0, _("All OK!")

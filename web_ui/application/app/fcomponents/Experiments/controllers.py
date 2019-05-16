@@ -9,6 +9,7 @@ from bson import ObjectId
 from flask import Blueprint, redirect, url_for, render_template, request, abort, send_from_directory, send_file
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
+from flask_babel import _, lazy_gettext
 from werkzeug.utils import secure_filename
 from wtforms import HiddenField, SelectField, validators
 import shutil
@@ -27,12 +28,12 @@ module = Blueprint("Experiments", __name__, url_prefix="/experiments")
 
 class ExpForm(FlaskForm):
     meta_ = HiddenField()
-    batch_uid = SelectField("Batch: ", default="0", coerce=str)
-    format_uid = SelectField("Format: ", default="0", coerce=str)
+    batch_uid = SelectField(lazy_gettext("Batch: "), default="0", coerce=str)
+    format_uid = SelectField(lazy_gettext("Format: "), default="0", coerce=str)
 
 
 class AttachParserForm(FlaskForm):
-    parser_uid = SelectField("Parser: ", default=None, validators=[validators.DataRequired()])
+    parser_uid = SelectField(lazy_gettext("Parser: "), default=None, validators=[validators.DataRequired()])
 
 
 class SampleModel(Common.ModelFactory.produce("samples",
@@ -136,7 +137,7 @@ class ExpModel(Common.ModelFactory.produce("experiments",
 
         if exp:
             if exp.locked:
-                raise ValueError("Experiment is locked")
+                raise ValueError(_("Experiment is locked"))
 
             data_path = os.path.join(AppConfig.EXP_DATA_FOLDER, uid)
             if os.path.exists(data_path):
@@ -182,7 +183,7 @@ class ExpModel(Common.ModelFactory.produce("experiments",
 def index():
     experiments = ExpModel.load_all()
 
-    return render_template("experiments/experiments.html", experiments=experiments, title="Experiments")
+    return render_template("experiments/experiments.html", experiments=experiments, title=_("Experiments"))
 
 
 @module.route("/create", methods=Common.http_methods)
@@ -192,24 +193,24 @@ def create():
 
     formats = FormatModel.load_all()
 
-    form.format_uid.choices = [("0", "Nothing selected")]
+    form.format_uid.choices = [("0", _("Nothing selected"))]
     form.format_uid.choices += [(a.uid, a.title) for a in formats]
 
     batches = BatchModel.load_all()
 
-    form.batch_uid.choices = [("0", "No batch")]
+    form.batch_uid.choices = [("0", _("No batch"))]
     form.batch_uid.choices += [(a.uid, a.title) for a in batches]
 
     if form.validate_on_submit():
         if form.batch_uid.data == "0" and form.format_uid.data == "0":
-            Common.flash("No format selected", category="danger")
+            Common.flash(_("No format selected"), category="danger")
         else:
             meta_json = form.meta_.data
 
             try:
                 json.loads(meta_json)
             except ValueError:
-                Common.flash("Unable to parse JSON", category="danger")
+                Common.flash(_("Unable to parse JSON"), category="danger")
             else:
                 exp = ExpModel()
                 exp.locked = False
@@ -242,7 +243,7 @@ def create():
         form=form,
         formats=formats,
         batches=batches,
-        title="Add experiment"
+        title=_("Add experiment")
     )
 
 
@@ -358,7 +359,7 @@ def view(uid):
         experiment_parsers=experiment_parsers,
         samples=samples,
         form=form,
-        title="Experiment"
+        title=_("Experiment")
     )
 
 
@@ -398,7 +399,7 @@ def view_sample(sample_uid):
         experiment=experiment,
         experiment_parsers=experiment_parsers,
         sample=sample,
-        title="Sample"
+        title=_("Sample")
     )
 
 

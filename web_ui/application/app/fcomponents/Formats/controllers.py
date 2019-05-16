@@ -1,6 +1,7 @@
 from flask import Blueprint, redirect, url_for, render_template, request
 from flask_login import login_required
 from flask_wtf import FlaskForm
+from flask_babel import _, lazy_gettext
 from wtforms import HiddenField, StringField, validators
 import json
 import app.fcomponents.Common as Common
@@ -12,18 +13,18 @@ module = Blueprint("Formats", __name__, url_prefix="/formats")
 
 class FormatForm(FlaskForm):
     format = HiddenField()
-    title = StringField([validators.DataRequired()], render_kw={"placeholder": "Title"})
+    title = StringField([validators.DataRequired()], render_kw={"placeholder": lazy_gettext("Title")})
 
 
 class FormatModel(ModelFactory.produce("formats", ["json_data", "title"])):
     def save(self):
         if self.title == "":
-            raise ValueError("Invalid title")
+            raise ValueError(_("Invalid title"))
 
         conflicts = db[self.table].find_one({"title": self.title})
 
         if conflicts:
-            raise ValueError("Format with specified title already exists")
+            raise ValueError(_("Format with specified title already exists"))
 
         super().save()
 
@@ -34,10 +35,10 @@ class FormatModel(ModelFactory.produce("formats", ["json_data", "title"])):
 
         batch = BatchModel.find_one({"format_uid": uid})
         if batch:
-            raise ValueError("The format is used by following batch: <b>%s</b>" % batch.title)
+            raise ValueError(_("The format is used by following batch:") + "<b>%s</b>" % batch.title)
 
         if ExpModel.find_one({"format_uid": uid}):
-            raise ValueError("The format is used by some experiments")
+            raise ValueError(_("The format is used by some experiments"))
 
         super().save()
 
@@ -62,7 +63,7 @@ class FormatModel(ModelFactory.produce("formats", ["json_data", "title"])):
 def index():
     formats = FormatModel.load_all()
 
-    return render_template("formats/formats.html", formats=formats, title="Formats")
+    return render_template("formats/formats.html", formats=formats, title=_("Formats"))
 
 
 @module.route("/create", methods=Common.http_methods)
@@ -76,7 +77,7 @@ def create():
         try:
             json.loads(format_json)
         except ValueError:
-            Common.flash("Unable to parse JSON", category="danger")
+            Common.flash(_("Unable to parse JSON"), category="danger")
         else:
             format_ = FormatModel()
             format_.json_data = format_json
@@ -89,7 +90,7 @@ def create():
             else:
                 return redirect(url_for("Formats.index"))
 
-    return render_template("formats/create_format.html", form=form, title="Add format")
+    return render_template("formats/create_format.html", form=form, title=_("Add format"))
 
 
 @module.route("/delete/<uid>", methods=Common.http_methods)

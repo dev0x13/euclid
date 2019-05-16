@@ -43,7 +43,7 @@
     </form>
 {%- endmacro %}
 
-{% macro render_button_with_confirm(action_text='Button', class_='', action_url='#', confirmation_text = "Are you sure?") -%}
+{% macro render_button_with_confirm(action_text='Button', class_='', action_url='#', confirmation_text = _("Are you sure?")) -%}
   <button type='button' class='{{ class_ }}'
           onclick='if (confirm("{{ confirmation_text }}")) location.href = "{{ action_url }}"'>
     {{ action_text }}

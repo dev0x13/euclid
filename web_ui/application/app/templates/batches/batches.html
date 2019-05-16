@@ -28,17 +28,17 @@
 {% endblock %}
 
 {% block page_content %}
-    <a class="btn btn-primary" href="{{ url_for('Batches.create') }}" role="button">Create</a>
+    <a class="btn btn-primary" href="{{ url_for('Batches.create') }}" role="button">{{ _("Create") }}</a>
     <br>
     <br>
     <table class='table table-striped table-hover' data-search="true" data-pagination="true" data-toggle="table" id="batches">
         <thead>
         <tr>
             <th data-field="d" data-sortable="true">UID</th>
-            <th data-field="e" data-sortable="true">Title</th>
-            <th data-field="a" data-sortable="true">Creation time</th>
-            <th data-field="b" data-sortable="true">Creator</th>
-            <th data-field="c" data-sortable="false">Meta</th>
+            <th data-field="e" data-sortable="true">{{ _("Title") }}</th>
+            <th data-field="a" data-sortable="true">{{ _("Creation time") }}</th>
+            <th data-field="b" data-sortable="true">{{ _("Creator") }}</th>
+            <th data-field="c" data-sortable="false">{{ _("Meta") }}</th>
             <th class="col-xs-1"></th>
         </tr>
         </thead>

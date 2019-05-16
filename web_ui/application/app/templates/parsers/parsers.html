@@ -12,15 +12,15 @@
 {% endblock %}
 
 {% block page_content %}
-<a class="btn btn-primary" href="{{ url_for('Parsers.create') }}" role="button">Create</a>
+<a class="btn btn-primary" href="{{ url_for('Parsers.create') }}" role="button">{{ _("Create") }}</a>
 <br>
 <br>
 <table class='table table-striped table-hover' data-pagination="true" data-toggle="table">
     <thead>
     <tr>
         <th data-field="a" data-sortable="false">UID</th>
-        <th data-field="b" data-sortable="true">Creator</th>
-        <th data-field="c" data-sortable="true">Title</th>
+        <th data-field="b" data-sortable="true">{{ _("Creator") }}</th>
+        <th data-field="c" data-sortable="true">{{ _("Title") }}</th>
         <th class="col-xs-1"></th>
     </tr>
     </thead>
@@ -33,7 +33,7 @@
         <td>{{ f.creator_name }}</td>
         <td>{{ f.title }}</td>
         <td>{{ macros.render_button_with_confirm(utils.icon('trash'), 'btn btn-default', url_for("Parsers.delete", uid=f.uid)) }}</td>
-    </td>
+    </tr>
     {% endfor %}
     </tbody>
 </table>

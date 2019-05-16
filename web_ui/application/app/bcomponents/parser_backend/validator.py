@@ -25,4 +25,4 @@ def validate_parser(code):
         except ContainerError as e:
             return 1, str(e)
 
-        return 0, "All OK!"
+        return 0, _("All OK!")

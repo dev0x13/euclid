@@ -4,6 +4,7 @@ from flask import flash, redirect, abort
 from app import db
 from bson.objectid import ObjectId
 from flask_login import current_user
+from flask_babel import _
 
 http_methods = ["GET", "POST"]
 
@@ -90,7 +91,7 @@ class ModelFactory:
 def format_meta_eq(format_, meta, key_path="ROOT"):
     for k in format_:
         if k not in meta:
-            raise ValueError("Format doesn't match with metadata. Key missing: %s:%s" % (key_path, k))
+            raise ValueError(_("Format doesn't match with metadata. Key missing: ") + "%s:%s" % (key_path, k))
 
         if isinstance(format_[k], dict):
             format_meta_eq(
@@ -100,7 +101,7 @@ def format_meta_eq(format_, meta, key_path="ROOT"):
             )
         else:
             if type(format_[k]) != type(meta[k]):
-                raise ValueError("Format doesn't match with metadata. Invalid value type for key: %s:%s" % (key_path, k))
+                raise ValueError(_("Format doesn't match with metadata. Invalid value type for key: ") + "%s:%s" % (key_path, k))
 
 
 def check_access(action):
