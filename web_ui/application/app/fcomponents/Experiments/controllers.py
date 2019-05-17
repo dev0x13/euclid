@@ -219,7 +219,7 @@ def create():
                 exp.batch_uid = form.batch_uid.data
                 exp.timestamp = time.time()
                 exp.num_samples = 0
-                exp.format_uid = form.format_uid.data if exp.batch_uid == "0" else BatchModel.load(exp.batch_uid).format_uid
+                exp.format_uid = form.format_uid.data if exp.batch_uid == "0" else BatchModel.load(exp.batch_uid).exp_format_uid
 
                 try:
                     exp.save()

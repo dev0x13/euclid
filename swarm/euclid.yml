@@ -14,7 +14,22 @@ services:
             - net
         ports:
             - "27017:27017"
-
+    web-ui:
+        image: euclid-web-ui:latest
+        depends_on:
+            - mongo
+        deploy:
+            restart_policy:
+                condition: on-failure
+            placement:
+                constraints: [node.role == manager]
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /data/euclid:/data/euclid
+        networks:
+            - net
+        ports:
+            - "5000:5000"
 networks:
     net:
        driver: overlay

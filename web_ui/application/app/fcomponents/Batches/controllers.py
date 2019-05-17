@@ -78,7 +78,7 @@ class BatchModel(ModelFactory.produce("batches",
 
     @classmethod
     def delete(cls, uid):
-        from application.app.fcomponents.Experiments.controllers import ExpModel
+        from app.fcomponents.Experiments.controllers import ExpModel
 
         experiments = ExpModel.load_all_by_batch(uid)
 
