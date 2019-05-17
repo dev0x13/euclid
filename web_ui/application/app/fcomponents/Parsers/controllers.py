@@ -28,7 +28,7 @@ class ParserForm(FlaskForm):
 class ParserModel(ModelFactory.produce("parsers",
                                       [
                                           "title",
-                                          "creator_id",
+                                          "creator_uid",
                                           "code"
                                       ])):
     @classmethod
@@ -36,7 +36,7 @@ class ParserModel(ModelFactory.produce("parsers",
         inst = super().load_all()
 
         for i in inst:
-            setattr(i, "creator_name", UserModel.get_name(i.creator_id))
+            setattr(i, "creator_name", UserModel.get_name(i.creator_uid))
 
         return inst
 

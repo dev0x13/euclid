@@ -52,6 +52,12 @@ class SampleModel(Common.ModelFactory.produce("samples",
         return inst
 
     @classmethod
+    def load(cls, uid):
+        i = super().load(uid)
+        setattr(i, "creator_name", UserModel.get_name(i.creator_uid))
+        return i
+
+    @classmethod
     def export(cls, uid, with_experiment=True):
         i = cls.load(uid)
 

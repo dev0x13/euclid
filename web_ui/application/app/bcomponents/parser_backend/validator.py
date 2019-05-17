@@ -1,6 +1,7 @@
 import os
 import docker
 from docker.errors import ContainerError
+from flask_babel import _
 
 from app.bcomponents.parser_backend.executor import PARSER_BASE, parser_tmp_workspace
 
