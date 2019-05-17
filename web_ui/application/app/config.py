@@ -74,4 +74,4 @@ class AppConfigWindows:
 
 
 # Change this line is you are using Linux
-AppConfig = AppConfigLinux
+AppConfig = AppConfigDocker
