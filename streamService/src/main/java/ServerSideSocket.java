@@ -4,11 +4,16 @@ import com.mongodb.util.JSON;
 
 import java.net.*;
 import java.io.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ServerSideSocket {
     private MongoClient mongoClient;
     private DBCollection collection;
     private String[] formatFields;
+
+    private final int queueСapacity = 10;
+    List<boolean[]> samplesState;
 
     ServerSideSocket(){
         try {
@@ -18,6 +23,7 @@ public class ServerSideSocket {
         }
         DB tmpBase = mongoClient.getDB("ExpBase");
         collection = tmpBase.getCollection("Samples");
+        samplesState = new LinkedList<>();
     }
 
     private boolean validateJson(DBObject sample) throws Exception { // true if client said exp is finished
@@ -61,23 +67,34 @@ public class ServerSideSocket {
 
                 toClient.println("Connection succeeded");
 
+                int messageCount = 0;
+                boolean[] state = new boolean[queueСapacity];
+                for (int i = 0; i < queueСapacity; i++) state[i] = false;
+
                 while (true) {
                     line = fromClient.readLine();
                     System.out.println("Server received: " + line);
+                    messageCount++;
+
+                    if(messageCount % queueСapacity == 1) {
+                        samplesState.add(state);
+                        state = new boolean[queueСapacity];
+                        for (int i = 0; i < queueСapacity; i++) state[i] = false;
+                    }
 
                     try {
                         DBObject sample = (DBObject)JSON.parse(line);
                         sessionFinished = validateJson(sample);
 
-                        collection.insert(sample);
-                        toClient.println("0");
+                        if(!sessionFinished) {
+                            collection.insert(sample);
+                            state[Integer.parseInt(sample.get("id").toString()) % queueСapacity] = true;
+                        }
                     } catch (Exception e) {
-                        toClient.println("-1");
+
                     }
 
-                    if (!sessionFinished)
-                        toClient.println("Thank you for connecting to " + server.getLocalSocketAddress());
-                    else {
+                    if (sessionFinished) {
                         toClient.println("Finish successfully");
                         break;
                     }

@@ -6,7 +6,7 @@ import java.net.*;
 import java.util.Arrays;
 
 public class ClientSocket {
-    private int maxRepeatTriesCount = 3;
+    private final int queueСapacity = 10;
 
     PrintWriter toServer;
     BufferedReader fromServer;
@@ -45,22 +45,27 @@ public class ClientSocket {
         boolean finish = false;
         int tryCount = 0;
         boolean canSendNew = true;
-        DBObject sample = null;
-        int samplesCount = 0;
 
         try {
             Socket socket = acquaintance(inJsonFields);
 
-            while (!finish) {
-                if(canSendNew) {
-                    if(samplesCount < 100) {
-                        sample = callBack.generateSample();
+            new Thread() {
+                private void run(ExpGenerator callBack) {
+                    System.out.println(getName() + " was activated");
+                    DBObject expSample;
+                    int samplesCount = 0;
+
+                    while (samplesCount < 100) {
+                        expSample = callBack.generateSample();
                         samplesCount++;
-                    } else {
-                        sample = new BasicDBObject("finish", "yes");
+                        toServer.println(expSample);
                     }
+                    expSample = new BasicDBObject("finish", "yes");
+                    toServer.println(expSample);
                 }
-                toServer.println(sample);
+            }.run(callBack);
+
+            while (!finish) {
 
                 String line = fromServer.readLine();
                 switch (line) {
@@ -74,13 +79,7 @@ public class ClientSocket {
                         break;
 
                     case "-1":
-                        tryCount++;
-                        if(tryCount < maxRepeatTriesCount) {
-                            canSendNew = false;
-                        } else {
-                            canSendNew = true;
-                            tryCount = 0;
-                        }
+                        tryCount = 0;
                         break;
 
                     case "0": tryCount = 0; canSendNew = true; break;
