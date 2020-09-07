@@ -6,4 +6,4 @@ This repository hosts a source code for an attempt of creating a universal exper
 2. **Lack of structure**. It is common not to have a standard format to store experiment metadata even in a small workgroup. Due to that, it is impossible to reproduce the experiment and to correctly interpret its results. Moreover, this approach makes new researcher onboarding more difficult .
 3. **Loss of relevance**. Data loses its relevance, because of the two points above: there is no way to receive the latest data with a minor delay.
 
-This project was a part of a university course, so the detailed system description with UML diagrams and case study can be found at [the following document](https://github.com/dev0x13/euclid/blob/master/doc/Euclid_report_fin.pdf) (it is in Russian).
+This project was a part of a university course, so the detailed system description with UML diagrams and case study can be found in [the following document](https://github.com/dev0x13/euclid/blob/master/doc/Euclid_report_fin.pdf) (it is in Russian).
